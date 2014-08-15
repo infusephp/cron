@@ -1,0 +1,25 @@
+{
+	"name": "idealistsoft/framework-cron",
+	"version": "1.0",
+	"description": "Scheduled tasks module for Idealist Framework",
+	"type": "library",
+	"keywords": ["idealist","framework","cron","scheduled","tasks","background"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "jaredtking",
+			"email": "j@jaredtking.com",
+			"homepage": "http://jaredtking.com"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/idealistsoft/framework-cron/issues",
+		"source": "https://github.com/idealistsoft/framework-cron"
+	},
+    "autoload": {
+        "psr-0": {"\\": "src/"}
+    },
+	"require": {
+		"php": ">=5.4.0"
+	}
+}
