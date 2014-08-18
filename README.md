@@ -10,4 +10,10 @@ Schedule tasks module for Idealist Framework
 
 ## Installation
 
-Simply add the composer package in the require section of your app's `composer.json` and run `composer update`
+1. Add the composer package in the require section of your app's `composer.json` and run `composer update`
+
+2. Setup a cron job for Idealist Framework in your crontab:
+
+```bash
+*	*	*	*	*	php /var/www/example.com/public/index.php /cron/scheduleCheck
+```
