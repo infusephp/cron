@@ -17,12 +17,13 @@ use app\cron\libs\Cron;
 class Controller
 {
 	public static $properties = [
-		'scaffoldAdmin' => true,
 		'models' => [ 'CronJob' ],
 		'routes' => [
 			'get /cron/scheduleCheck' => 'checkSchedule'
 		]
 	];
+
+	public static $scaffoldAdmin;
 
 	private $app;
 
