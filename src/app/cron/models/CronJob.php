@@ -25,13 +25,11 @@ class CronJob extends Model
 	public static $properties = [
 		'module' => [
 			'type' => 'text',
-			'length' => 100,
 			'mutable' => true,
 			'required' => true
 		],
 		'command' => [
 			'type' => 'text',
-			'length' => 100,
 			'mutable' => true,
 			'required' => true
 		],
@@ -53,9 +51,6 @@ class CronJob extends Model
 		],
 		'locked' => [
 			'type' => 'text',
-			'length' => '32',
-			'db_type' => 'char',
-			'default' => '00000000000000000000000000000000',
 			'admin_hidden_property' => true,
 		]
 	];

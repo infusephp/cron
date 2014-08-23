@@ -21,5 +21,12 @@
     },
 	"require": {
 		"php": ">=5.4.0"
-	}
+	},
+	"require-dev": {
+		"satooshi/php-coveralls": "dev-master",
+		"idealistsoft/framework-bootstrap": "dev-master",
+		"idealistsoft/framework-auth": "dev-master",
+		"robmorgan/phinx": "*"
+	},
+	"minimum-stability": "dev"
 }
