@@ -2,9 +2,9 @@
 
 use infuse\Database;
 
-use app\cront\models\CronJob;
+use app\cron\models\CronJob;
 
-class GroupMemberTest extends \PHPUnit_Framework_TestCase
+class CronJobTest extends \PHPUnit_Framework_TestCase
 {
 	static $job;
 
