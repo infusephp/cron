@@ -24,17 +24,15 @@ class CronJob extends Model
 
 	public static $properties = [
 		'module' => [
-			'type' => 'text',
-			'mutable' => true,
+			'type' => 'string',
 			'required' => true
 		],
 		'command' => [
-			'type' => 'text',
-			'mutable' => true,
+			'type' => 'string',
 			'required' => true
 		],
 		'last_ran' => [
-			'type' => 'date',
+			'type' => 'number',
 			'admin_type' => 'datepicker'
 		],
 		'last_run_result' => [
@@ -43,15 +41,15 @@ class CronJob extends Model
 			'admin_type' => 'checkbox'
 		],
 		'last_run_output' => [
-			'type' => 'longtext',
+			'type' => 'string',
 			'admin_type' => 'textarea',
 			'admin_hidden_property' => true,
 			'admin_html' => '<pre>{last_run_output}</pre>',
-			'admin_truncate' => false,
+			'admin_truncate' => false
 		],
 		'locked' => [
-			'type' => 'text',
-			'admin_hidden_property' => true,
+			'type' => 'string',
+			'admin_hidden_property' => true
 		]
 	];
 
