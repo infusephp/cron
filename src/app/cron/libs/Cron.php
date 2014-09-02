@@ -11,8 +11,6 @@
 
 namespace app\cron\libs;
 
-use infuse\Database;
-
 use App;
 use app\cron\models\CronJob;
 
@@ -26,20 +24,19 @@ class Cron
 	 *
 	 * @return boolean true if all tasks ran successfully
 	 */
-	static function scheduleCheck( App $app, $echoOutput = false )
+	public static function scheduleCheck(App $app, $echoOutput = false)
 	{
 		if( $echoOutput )
 			echo "-- Starting Cron on " . $app[ 'config' ]->get( 'site.title' ) . "\n";
-		
+
 		$success = true;
-		
-		foreach( CronJob::overdueJobs() as $job )
-		{
+
+		foreach ( CronJob::overdueJobs() as $job ) {
 			$taskSuccess = self::runJob( $job[ 'model' ], $job[ 'expires' ], $app, $echoOutput );
-			
+
 			$success = $taskSuccess && $success;
 		}
-		
+
 		return $success;
 	}
 
@@ -53,11 +50,10 @@ class Cron
 	 *
 	 * @return boolean result
 	 */
-	static function runJob( CronJob $job, $expires, App $app, $echoOutput = false )
+	public static function runJob(CronJob $job, $expires, App $app, $echoOutput = false)
 	{
 		// only run the job if we can get the lock
-		if( !$job->getLock( $expires ) )
-		{
+        if ( !$job->getLock( $expires ) ) {
 			if( $echoOutput )
 				echo "{$job->module}.{$job->command} locked!\n";
 
@@ -65,36 +61,30 @@ class Cron
 		}
 
 		// attempt to execute the job
-		$success = false;
+        $success = false;
 		$output = '';
 
-		try
-		{
+		try {
 			$controller = '\\app\\' . $job->module . '\\Controller';
-			
-			if( class_exists( $controller ) )
-			{
+
+			if ( class_exists( $controller ) ) {
 				if( $echoOutput )
 					echo "Starting {$job->module}.{$job->command}:\n";
-				
+
 				ob_start();
-				
+
 				$controllerObj = new $controller( $app );
 
 				if( !method_exists( $controllerObj, 'cron' ) )
 					echo "$controller\-\>cron($command) does not exist\n";
 				else
 					$success = $controllerObj->cron( $job->command );
-				
+
 				$output = ob_get_clean();
-			}
-			else
-			{
+			} else {
 				$output = "{$job->module} does not exist";
 			}
-		}
-		catch( \Exception $e )
-		{
+		} catch ( \Exception $e ) {
 			$output .= "\n" . $e->getMessage();
 		}
 
@@ -104,10 +94,10 @@ class Cron
 			'last_run_output' => $output ] );
 
 		$job->releaseLock();
-		
+
 		if( $echoOutput )
 			echo $output . (( $success ) ? "\tFinished Successfully\n" : "\tFailed\n");
-		
+
 		return $success;
 	}
 }

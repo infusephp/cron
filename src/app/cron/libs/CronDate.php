@@ -10,12 +10,12 @@
  */
 
 namespace app\cron\libs;
- 
+
 class CronDate
 {
 	///////////////////////////
-	// Private Class Variables
-	///////////////////////////		
+    // Private Class Variables
+    ///////////////////////////
 
 	private $myTimestamp;
 	static private $dateComponent = [
@@ -42,9 +42,9 @@ class CronDate
 	* Constructor
 	* @param int $timestamp timestamp
 	*/
-	function __construct($timestamp = null)
+	public function __construct($timestamp = null)
 	{
-		$this->myTimestamp = is_null($timestamp)?time():$timestamp;
+		$this->myTimestamp = is_null($timestamp) ? time() : $timestamp;
 	}
 
 	/**
@@ -52,7 +52,8 @@ class CronDate
 	* @param string $var value to get
 	* @return mixed value
 	*/
-	function __get($var) {
+	public function __get($var)
+	{
 			return date(self::$dateComponent[$var], $this->myTimestamp);
 	}
 
@@ -61,10 +62,10 @@ class CronDate
 	* @param string $var type of set to perform
 	* @param mixed $value value to set
 	*/
-	function __set($var, $value) {
+	public function __set($var, $value)
+	{
 			list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year'], $c['dow']) = explode(' ', date('s i G j n Y w', $this->myTimestamp));
-			switch ($var)
-			{
+			switch ($var) {
 			case 'dow':
 				$this->myTimestamp = strtotime(self::$weekday[$value], $this->myTimestamp);
 				break;
@@ -82,7 +83,7 @@ class CronDate
 	* @param string $how date
 	* @return boolean success
 	*/
-	function modify($how)
+	public function modify($how)
 	{
 		return $this->myTimestamp = strtotime($how, $this->myTimestamp);
 	}

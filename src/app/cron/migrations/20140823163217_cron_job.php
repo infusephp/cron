@@ -9,8 +9,7 @@ class CronJob extends AbstractMigration
      */
     public function change()
     {
-        if( !$this->hasTable( 'CronJobs' ) )
-        {
+        if ( !$this->hasTable( 'CronJobs' ) ) {
             $table = $this->table( 'CronJobs', [ 'id' => false, 'primary_key' => [ 'module', 'command' ] ] );
             $table->addColumn( 'module', 'string', [ 'length' => 100 ] )
                   ->addColumn( 'command', 'string', [ 'length' => 100 ] )
@@ -21,13 +20,13 @@ class CronJob extends AbstractMigration
                   ->create();
         }
     }
-    
+
     /**
      * Migrate Up.
      */
     public function up()
     {
-    
+
     }
 
     /**
