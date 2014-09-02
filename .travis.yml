@@ -17,8 +17,8 @@ before_script:
     - composer self-update
     - composer install
     - mysql -e 'create database mydb;'
-    - php vendor/robmorgan/phinx/bin/phinx migrate
-    - php vendor/robmorgan/phinx/bin/phinx migrate -c vendor/idealistsoft/framework-auth/phinx.yml
+    - php vendor/bin/phinx migrate
+    - php vendor/bin/phinx migrate -c vendor/idealistsoft/framework-auth/phinx.yml
 
 script:
     - mkdir -p build/logs
