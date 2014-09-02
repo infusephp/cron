@@ -1,6 +1,5 @@
 {
 	"name": "idealistsoft/framework-cron",
-	"version": "1.0",
 	"description": "Scheduled tasks module for Idealist Framework",
 	"type": "library",
 	"keywords": ["idealist","framework","cron","scheduled","tasks","background"],
@@ -17,7 +16,7 @@
 		"source": "https://github.com/idealistsoft/framework-cron"
 	},
     "autoload": {
-        "psr-0": {"": "src"}
+        "psr-4": {"app\\cron\\": "src/"}
     },
 	"require": {
 		"php": ">=5.4.0"
