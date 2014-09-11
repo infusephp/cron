@@ -1,36 +1,20 @@
 <?php
 
-/**
- * @package infuse\framework
- * @author Jared King <j@jaredtking.com>
- * @link http://jaredtking.com
- * @version 0.1.16
- * @copyright 2013 Jared King
- * @license MIT
- */
-
 namespace app\cron;
 
-use App;
+use InjectApp;
 use app\cron\libs\Cron;
 
 class Controller
 {
+    use InjectApp;
+    
     public static $properties = [
         'models' => [ 'CronJob' ],
         'routes' => [
             'get /cron/scheduleCheck' => 'checkSchedule'
         ]
     ];
-
-    public static $scaffoldAdmin;
-
-    private $app;
-
-    public function __construct(App $app)
-    {
-        $this->app = $app;
-    }
 
     public function checkSchedule($req, $res)
     {
