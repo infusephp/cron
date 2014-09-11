@@ -2,12 +2,11 @@
 
 namespace app\cron;
 
-use InjectApp;
 use app\cron\libs\Cron;
 
 class Controller
 {
-    use InjectApp;
+    use \InjectApp;
     
     public static $properties = [
         'models' => [ 'CronJob' ],
