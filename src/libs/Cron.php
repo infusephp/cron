@@ -73,7 +73,10 @@ class Cron
 
                 ob_start();
 
-                $controllerObj = new $controller( $app );
+                $controllerObj = new $controller;
+
+                if (method_exists($controllerObj, 'injectApp'))
+                    $controllerObj->injectApp($this->app);
 
                 if( !method_exists( $controllerObj, 'cron' ) )
                     echo "$controller\-\>cron($command) does not exist\n";
