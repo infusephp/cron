@@ -12,7 +12,7 @@
 namespace app\cron\models;
 
 use infuse\Model;
-use infuse\Util;
+use infuse\Utility as U;
 
 use app\cron\libs\Cron;
 use app\cron\libs\CronDate;
@@ -145,7 +145,7 @@ class CronJob extends Model
 
             $jobs[] = [
                 'model' => $model,
-                'expires' => (int) Util::array_value( $job, 'expires' ) ];
+                'expires' => (int) U::array_value( $job, 'expires' ) ];
         }
 
         return $jobs;
