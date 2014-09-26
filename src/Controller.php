@@ -15,6 +15,8 @@ class Controller
         ]
     ];
 
+    public static $scaffoldAdmin;
+
     public function checkSchedule($req, $res)
     {
         if( !$req->isCli() )
