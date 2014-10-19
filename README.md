@@ -39,6 +39,6 @@ Schedule tasks module for Idealist Framework
 *	*	*	*	*	php /var/www/example.com/public/index.php /cron/scheduleCheck
 ```
 
-### Webhooks
+## Webhooks
 
 You can optionally specify a URL that will be called upon a successful run with the output from the run passed through the `m` query parameter. This was designed to be compatible with [Dead Man's Snitch](https://deadmanssnitch.com/)
