@@ -41,4 +41,4 @@ Schedule tasks module for Idealist Framework
 
 ### Webhooks
 
-You can optionally specify a URL that will be called upon a successful run with the output from the run passed through the `m` query parameter. This was designed to be compatible with [Dead Man's Snitch](https://deadmanssnitch.com/)
+You can optionally specify a URL that will be called upon a successful run. The output from the run will be available using the `m` query parameter. This was designed to be compatible with [Dead Man's Snitch](https://deadmanssnitch.com/).
