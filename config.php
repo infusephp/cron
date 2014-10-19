@@ -22,5 +22,22 @@ return  [
     'enabled' => true,
     'adapter' => 'database',
     'lifetime' => 86400
+  ],
+  'cron' => [
+    [
+      'module' => 'test',
+      'command' => 'test',
+      'expires' => 60,
+      'successUrl' => 'http://webhook.example.com',
+      'minute' => 0,
+      'hour' => 0,
+      'day' => '*',
+      'month' => '*',
+      'week' => '*'
+    ],
+    [
+      'module' => 'test',
+      'command' => 'test2'
+    ]
   ]
 ];

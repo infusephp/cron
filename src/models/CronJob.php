@@ -17,6 +17,12 @@ use infuse\Utility as U;
 use app\cron\libs\Cron;
 use app\cron\libs\CronDate;
 
+define('CRON_JOB_SUCCESS', 1);
+define('CRON_JOB_LOCKED', 2);
+define('CRON_JOB_CONTROLLER_NON_EXISTENT', 3);
+define('CRON_JOB_METHOD_NON_EXISTENT', 4);
+define('CRON_JOB_FAILED', 5);
+
 class CronJob extends Model
 {
     public static $scaffoldApi = true;
@@ -32,27 +38,24 @@ class CronJob extends Model
         ],
         'last_ran' => [
             'type' => 'number',
+            'null' => true,
             'admin_type' => 'datepicker'
         ],
         'last_run_result' => [
             'type' => 'boolean',
-            'default' => false,
+            'null' => true,
             'admin_type' => 'checkbox'
         ],
         'last_run_output' => [
             'type' => 'string',
+            'null' => true,
             'admin_type' => 'textarea',
             'admin_hidden_property' => true,
             'admin_html' => '<pre>{last_run_output}</pre>',
             'admin_truncate' => false
-        ],
-        'locked' => [
-            'type' => 'string',
-            'admin_hidden_property' => true
         ]
     ];
 
-    private static $redis;
     private $hasLock;
 
     public static function idProperty()
@@ -68,8 +71,11 @@ class CronJob extends Model
     public function __construct($id = false)
     {
         parent::__construct( $id );
+    }
 
-        $this->lockName = $this->app[ 'config' ]->get( 'site.host-name' ) . ':' .
+    function lockName()
+    {
+        return $this->app['config']->get('site.hostname') . ':' .
             'cron.' . $this->module . '.' . $this->command;
     }
 
@@ -83,14 +89,14 @@ class CronJob extends Model
     public function getLock($expires = 0)
     {
         // do not lock if expiry time is 0
-        if( $expires <= 0 )
-
+        if ($expires <= 0)
             return true;
 
-        $r = $this->app[ 'redis' ];
+        $r = $this->app['redis'];
+        $lock = $this->lockName();
 
-        if ( $r->setnx( $this->lockName, $expires ) ) {
-            $r->expire( $this->lockName, $expires );
+        if ($r->setnx($lock, $expires)) {
+            $r->expire($lock, $expires);
 
             $this->hasLock = true;
 
@@ -102,13 +108,75 @@ class CronJob extends Model
 
     public function releaseLock()
     {
-        if( !$this->hasLock )
-
+        if (!$this->hasLock)
             return;
 
-        $this->app[ 'redis' ]->del( $this->lockName );
+        $this->app['redis']->del($this->lockName());
 
         $this->hasLock = false;
+    }
+
+    /**
+     * Runs this cron job
+     *
+     * @param int $expires time the job has to finish
+     * @param string $successUrl URL to be called upon a successful run
+     *
+     * @return integer result
+     */
+    public function run($expires = 0, $successUrl = false)
+    {
+        // only run the job if we can get the lock
+        if (!$this->getLock($expires)) {
+            return CRON_JOB_LOCKED;
+        }
+
+        // attempt to execute the job
+        $success = false;
+        $output = '';
+
+        $class = '\\app\\' . $this->module . '\\Controller';
+
+        if (class_exists($class)) {
+            try
+            {
+                ob_start();
+
+                $controller = new $class;
+
+                if (method_exists($controller, 'injectApp')) 
+                    $controller->injectApp($this->app);
+
+                $command = $this->command;
+                if (!method_exists($controller, $command)) {
+                    ob_end_clean();
+                    return CRON_JOB_METHOD_NON_EXISTENT;
+                } else {
+                    $success = $controller->$command();
+                }
+
+                $output = ob_get_clean();
+            } catch (\Exception $e) {
+                $output = ob_get_clean();
+                $output .= "\n" . $e->getMessage();
+            }
+        } else {
+            return CRON_JOB_CONTROLLER_NON_EXISTENT;
+        }
+
+        $this->set([
+            'last_ran' => time(),
+            'last_run_result' => $success,
+            'last_run_output' => $output ]);
+
+        // ping the success URL
+        if ($success && $successUrl) {
+            file_get_contents($successUrl . '?m=' . urlencode($output));
+        }
+
+        $this->releaseLock();
+
+        return ($success) ? CRON_JOB_SUCCESS : CRON_JOB_FAILED;
     }
 
     /**
@@ -118,34 +186,42 @@ class CronJob extends Model
 	 */
     public static function overdueJobs()
     {
-        $jobsFromConfig = (array) self::$injectedApp[ 'config' ]->get( 'cron' );
+        $jobsFromConfig = (array) self::$injectedApp['config']->get('cron');
 
         $jobs = [];
 
         // round current time down to nearest minute
-        $start = floor( time() / 60 ) * 60;
+        $start = floor(time() / 60) * 60;
 
         foreach ($jobsFromConfig as $job) {
-            // check if overdue
-            $nextRun = self::calcNextRun( $job );
+            $job = array_replace([
+                'minute' => '*',
+                'hour' => '*',
+                'day' => '*',
+                'week' => '*',
+                'month' => '*',
+                'successUrl' => '',
+                'expires' => 0 ], $job);
 
-            if( $nextRun > $start )
+            // check if overdue
+            $nextRun = self::calcNextRun($job);
+
+            if ($nextRun > $start)
                 continue;
 
             // check if model has already been created for the job
-            $model = new CronJob( [ $job[ 'module' ], $job[ 'command' ] ] );
+            $model = new CronJob([$job[ 'module'], $job['command']]);
 
-            // TODO why is this not working
-            if ( !$model->exists() ) {
+            if (!$model->exists()) {
                 $model = new CronJob();
-                $model->create( [
-                    'module' => $job[ 'module' ],
-                    'command' => $job[ 'command' ] ] );
+                $model->grantAllPermissions();
+                $model->create([
+                    'module' => $job['module'],
+                    'command' => $job['command']]);
             }
 
-            $jobs[] = [
-                'model' => $model,
-                'expires' => (int) U::array_value( $job, 'expires' ) ];
+            $job['model'] = $model;
+            $jobs[] = $job;
         }
 
         return $jobs;
@@ -158,9 +234,9 @@ class CronJob extends Model
 	 *
 	 * @return int timestamp
 	 */
-    private static function calcNextRun(array $params)
+    static function calcNextRun(array $params)
     {
-        $cron_date = new CronDate( time() );
+        $cron_date = new CronDate(time());
         $cron_date->second = 0;
 
         if( $params[ 'minute' ] == '*' ) $params[ 'minute' ] = null;

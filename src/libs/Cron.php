@@ -11,7 +11,6 @@
 
 namespace app\cron\libs;
 
-use App;
 use app\cron\models\CronJob;
 
 class Cron
@@ -19,87 +18,46 @@ class Cron
     /**
 	 * Checks the cron schedule and runs tasks
 	 *
-	 * @param App $app DI container
 	 * @param boolean $echoOutput echoes output
 	 *
 	 * @return boolean true if all tasks ran successfully
 	 */
-    public static function scheduleCheck(App $app, $echoOutput = false)
+    public static function scheduleCheck($echoOutput = false)
     {
-        if( $echoOutput )
-            echo "-- Starting Cron on " . $app[ 'config' ]->get( 'site.title' ) . "\n";
+        if ($echoOutput) {
+            echo "-- Starting Cron\n";
+        }
 
         $success = true;
 
-        foreach ( CronJob::overdueJobs() as $job ) {
-            $taskSuccess = self::runJob( $job[ 'model' ], $job[ 'expires' ], $app, $echoOutput );
+        foreach (CronJob::overdueJobs() as $jobInfo) {
+            $job = $jobInfo['model'];
 
-            $success = $taskSuccess && $success;
-        }
-
-        return $success;
-    }
-
-    /**
-	 * Runs a specific cron job
-	 *
-	 * @param CronJob job
-	 * @param int $expires time the job has to finish
-	 * @param App $app DI container
-	 * @param boolean $echoOutput
-	 *
-	 * @return boolean result
-	 */
-    public static function runJob(CronJob $job, $expires, App $app, $echoOutput = false)
-    {
-        // only run the job if we can get the lock
-        if ( !$job->getLock( $expires ) ) {
-            if( $echoOutput )
-                echo "{$job->module}.{$job->command} locked!\n";
-
-            return true;
-        }
-
-        // attempt to execute the job
-        $success = false;
-        $output = '';
-
-        try {
-            $controller = '\\app\\' . $job->module . '\\Controller';
-
-            if ( class_exists( $controller ) ) {
-                if( $echoOutput )
-                    echo "Starting {$job->module}.{$job->command}:\n";
-
-                ob_start();
-
-                $controllerObj = new $controller;
-
-                if (method_exists($controllerObj, 'injectApp'))
-                    $controllerObj->injectApp($app);
-
-                if( !method_exists( $controllerObj, 'cron' ) )
-                    echo "$controller\-\>cron($command) does not exist\n";
-                else
-                    $success = $controllerObj->cron( $job->command );
-
-                $output = ob_get_clean();
-            } else {
-                $output = "{$job->module} does not exist";
+            if ($echoOutput) {
+                echo "Starting {$job->module}.{$job->command}:\n";
             }
-        } catch ( \Exception $e ) {
-            $output .= "\n" . $e->getMessage();
+
+            $result = $job->run($jobInfo['expires'], $jobInfo['successUrl']);
+            $output = $job->last_run_output;
+
+            if ($echoOutput) {
+                if ($result == CRON_JOB_LOCKED) {
+                    echo "\t{$job->module}.{$job->command} locked!\n";
+                } else if ($result == CRON_JOB_CONTROLLER_NON_EXISTENT) {
+                    echo "\t{$job->module} does not exist\n";
+                } else if ($result == CRON_JOB_METHOD_NON_EXISTENT) {
+                    echo "\t{$job->module}\-\>{$job->command}() does not exist\n";
+                } else if ($result == CRON_JOB_FAILED) {
+                    echo "$output\n";
+                    echo "\tFailed\n";
+                } else if ($result == CRON_JOB_SUCCESS) {
+                    echo "$output\n";
+                    echo "\tFinished Successfully\n";
+                }
+            }
+
+            $success = $result == CRON_JOB_SUCCESS && $success;
         }
-
-        $job->set( [
-            'last_ran' => time(),
-            'last_run_result' => $success,
-            'last_run_output' => $output ] );
-
-        $job->releaseLock();
-
-        if( $echoOutput )
-            echo $output . (( $success ) ? "\tFinished Successfully\n" : "\tFailed\n");
 
         return $success;
     }
