@@ -34,7 +34,7 @@ class Cron
             $job = $jobInfo['model'];
 
             if ($echoOutput) {
-                echo "Starting {$job->module}.{$job->command}:\n";
+                echo "-- Starting {$job->module}.{$job->command}:\n";
             }
 
             $result = $job->run($jobInfo['expires'], $jobInfo['successUrl']);
@@ -42,17 +42,17 @@ class Cron
 
             if ($echoOutput) {
                 if ($result == CRON_JOB_LOCKED) {
-                    echo "\t{$job->module}.{$job->command} locked!\n";
+                    echo "{$job->module}.{$job->command} locked!\n";
                 } else if ($result == CRON_JOB_CONTROLLER_NON_EXISTENT) {
-                    echo "\t{$job->module} does not exist\n";
+                    echo "{$job->module} does not exist\n";
                 } else if ($result == CRON_JOB_METHOD_NON_EXISTENT) {
-                    echo "\t{$job->module}\-\>{$job->command}() does not exist\n";
+                    echo "{$job->module}\-\>{$job->command}() does not exist\n";
                 } else if ($result == CRON_JOB_FAILED) {
                     echo "$output\n";
-                    echo "\tFailed\n";
+                    echo "-- Failed!\n";
                 } else if ($result == CRON_JOB_SUCCESS) {
                     echo "$output\n";
-                    echo "\tFinished Successfully\n";
+                    echo "-- Success!\n";
                 }
             }
 
