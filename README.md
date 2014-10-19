@@ -11,8 +11,7 @@ Schedule tasks module for Idealist Framework
 
 1. Add the composer package in the require section of your app's `composer.json` and run `composer update`
 
-2. Add cron jobs to the `cron` section of your app's configuration:
-```php
+2. Add cron jobs to the `cron` section of your app's configuration: ```php
 'cron' => [
 	[
 		'module' => 'test',
@@ -34,8 +33,7 @@ Schedule tasks module for Idealist Framework
 
 3. Create your jobs. Each job is a method on a module controller.
 
-4. Add this to your crontab to begin running app cron jobs in the background:
-```bash
+4. Add this to your crontab to begin running app cron jobs in the background: ```bash
 *	*	*	*	*	php /var/www/example.com/public/index.php /cron/scheduleCheck
 ```
 
