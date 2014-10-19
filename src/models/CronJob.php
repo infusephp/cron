@@ -170,7 +170,7 @@ class CronJob extends Model
             'last_run_output' => $output ]);
 
         // ping the success URL
-        if ($success && $successUrl) {
+        if ($success && $successUrl && $this->app['config']->get('site.production-level')) {
             file_get_contents($successUrl . '?m=' . urlencode($output));
         }
 

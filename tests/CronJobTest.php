@@ -176,7 +176,19 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         self::$job->module = 'test';
         self::$job->command = 'success';
+        $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
+        $this->assertEquals("test", self::$job->last_run_output);
+    }
+
+    /**
+     * @depends testCreate
+     */
+    function testRunSuccessWithUrl()
+    {
+        self::$job->module = 'test';
+        self::$job->command = 'success';
         self::$functions->shouldReceive('file_get_contents')->with('http://webhook.example.com/?m=test')->once();
+        TestBootstrap::app('config')->set('site.production-level', true);
         $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
         $this->assertEquals("test", self::$job->last_run_output);
     }
