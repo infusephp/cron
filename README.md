@@ -35,7 +35,6 @@ Schedule tasks module for Idealist Framework
 3. Create your jobs. Each job is a method on a module controller.
 
 4. Add this to your crontab to begin running app cron jobs in the background:
-
 ```bash
 *	*	*	*	*	php /var/www/example.com/public/index.php /cron/scheduleCheck
 ```
