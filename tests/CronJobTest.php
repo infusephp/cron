@@ -2,7 +2,6 @@
 
 namespace app\cron\models;
 
-use infuse\Database;
 use Mockery;
 
 use App;
@@ -21,7 +20,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         include_once 'TestController.php';
 
-        Database::delete('CronJobs', ['module' => 'test']);
+        TestBootstrap::app('db')->delete('CronJobs')->where('module', 'test')->execute();
     }
 
     public function setUp() {
