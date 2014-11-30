@@ -26,7 +26,7 @@ class CronDate
         'month' => 'n',
         'year' => 'Y',
         'dow' => 'w',
-        'timestamp' => 'U'
+        'timestamp' => 'U',
     ];
     static private $weekday = [
         1 => 'monday',
@@ -35,37 +35,37 @@ class CronDate
         4 => 'thursday',
         5 => 'friday',
         6 => 'saturday',
-        0 => 'sunday'
+        0 => 'sunday',
     ];
 
     /**
-	* Constructor
-	* @param int $timestamp timestamp
-	*/
+    * Constructor
+    * @param int $timestamp timestamp
+    */
     public function __construct($timestamp = null)
     {
         $this->myTimestamp = is_null($timestamp) ? time() : $timestamp;
     }
 
     /**
-	* Getter
-	* @param string $var value to get
-	* @return mixed value
-	*/
+    * Getter
+    * @param string $var value to get
+    * @return mixed value
+    */
     public function __get($var)
     {
-            return date(self::$dateComponent[$var], $this->myTimestamp);
+        return date(self::$dateComponent[$var], $this->myTimestamp);
     }
 
     /**
-	* Setter
-	* @param string $var type of set to perform
-	* @param mixed $value value to set
-	*/
+    * Setter
+    * @param string $var type of set to perform
+    * @param mixed $value value to set
+    */
     public function __set($var, $value)
     {
-            list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year'], $c['dow']) = explode(' ', date('s i G j n Y w', $this->myTimestamp));
-            switch ($var) {
+        list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year'], $c['dow']) = explode(' ', date('s i G j n Y w', $this->myTimestamp));
+        switch ($var) {
             case 'dow':
                 $this->myTimestamp = strtotime(self::$weekday[$value], $this->myTimestamp);
                 break;
@@ -79,10 +79,10 @@ class CronDate
     }
 
     /**
-	* Modifies the timestamp using PHP's strtotime()
-	* @param string $how date
-	* @return boolean success
-	*/
+    * Modifies the timestamp using PHP's strtotime()
+    * @param string $how date
+    * @return boolean success
+    */
     public function modify($how)
     {
         return $this->myTimestamp = strtotime($how, $this->myTimestamp);

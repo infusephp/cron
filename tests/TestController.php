@@ -2,16 +2,17 @@
 
 namespace app\test;
 
-class Controller
+class TestController
 {
-	function exception()
-	{
-		throw new \Exception('test');
-	}
+    public function exception()
+    {
+        throw new \Exception('test');
+    }
 
-	function success()
-	{
-		echo 'test';
-		return true;
-	}
+    public function success()
+    {
+        echo 'test';
+
+        return true;
+    }
 }

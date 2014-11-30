@@ -8,8 +8,8 @@ return  [
   ],
   'modules' => [
     'middleware' => [
-      'auth'
-    ]
+      'auth',
+    ],
   ],
   'database' => [
     'type' => 'mysql',
@@ -21,7 +21,7 @@ return  [
   'sessions' => [
     'enabled' => true,
     'adapter' => 'database',
-    'lifetime' => 86400
+    'lifetime' => 86400,
   ],
   'cron' => [
     [
@@ -33,11 +33,11 @@ return  [
       'hour' => 0,
       'day' => '*',
       'month' => '*',
-      'week' => '*'
+      'week' => '*',
     ],
     [
       'module' => 'test',
       'command' => 'test2'
-    ]
+    ],
   ]
 ];

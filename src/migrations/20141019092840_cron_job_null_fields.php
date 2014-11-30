@@ -3,7 +3,7 @@
 use Phinx\Migration\AbstractMigration;
 
 class CronJobNullFields extends AbstractMigration
-{   
+{
     /**
      * Migrate Up.
      */
@@ -21,6 +21,5 @@ class CronJobNullFields extends AbstractMigration
      */
     public function down()
     {
-
     }
 }

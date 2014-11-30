@@ -3,31 +3,32 @@
 namespace app\cron\models;
 
 use Mockery;
-
 use App;
 use TestBootstrap;
 
-function file_get_contents($cmd) {
+function file_get_contents($cmd)
+{
     return CronJobTest::$functions->file_get_contents($cmd);
 }
 
 class CronJobTest extends \PHPUnit_Framework_TestCase
 {
     public static $functions;
-    static $job;
+    public static $job;
 
-    static function setUpBeforeClass()
+    public static function setUpBeforeClass()
     {
         include_once 'TestController.php';
 
         TestBootstrap::app('db')->delete('CronJobs')->where('module', 'test')->execute();
     }
 
-    public function setUp() {
+    public function setUp()
+    {
         self::$functions = Mockery::mock();
     }
 
-    static function tearDownAfterClass()
+    public static function tearDownAfterClass()
     {
         self::$job->delete();
     }
@@ -39,14 +40,14 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($job->can('create', TestBootstrap::app('user')));
     }
 
-    function testCalcNextRun()
+    public function testCalcNextRun()
     {
         $input = [
             'minute' => '*',
             'hour' => '*',
             'day' => '*',
             'month' => '*',
-            'week' => '*' ];
+            'week' => '*', ];
 
         // should be the next minute
         $expected = floor(time() / 60) * 60;
@@ -57,12 +58,13 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
             'hour' => '0',
             'day' => '0',
             'month' => '0',
-            'week' => '0' ];
+            'week' => '0', ];
 
         // should be the next Monday that is the first day of the month at 12:00
         $expected = mktime(0, 0, 0, date('m'), 1, date('Y'));
-        while (date('D', $expected) != 'Mon')
+        while (date('D', $expected) != 'Mon') {
             $expected = strtotime('+1 month', $expected);
+        }
 
         $this->assertEquals($expected, CronJob::calcNextRun($input));
     }
@@ -73,13 +75,13 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$job->grantAllPermissions();
         $this->assertTrue(self::$job->create([
             'module' => 'test',
-            'command' => 'test' ]));
+            'command' => 'test', ]));
     }
 
     /**
      * @depends testCreate
      */
-    function testOverdueJobs()
+    public function testOverdueJobs()
     {
         $overdue = CronJob::overdueJobs();
 
@@ -106,12 +108,12 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($job2['model']->exists());
     }
 
-    function testGetLock()
+    public function testGetLock()
     {
-        $job = new CronJob;
+        $job = new CronJob();
         $this->assertTrue($job->getLock());
 
-        $app = new App;
+        $app = new App();
         $app['config']->set('site.hostname', 'example.com');
         $redis = Mockery::mock();
         $redis->shouldReceive('setnx')->withArgs(['example.com:cron.module.command', 100])->andReturn(true)->once();
@@ -120,16 +122,16 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $app['redis'] = $redis;
         CronJob::inject($app);
 
-        $job = new CronJob;
+        $job = new CronJob();
         $job->module = 'module';
         $job->command = 'command';
         $this->assertTrue($job->getLock(100));
         $job->releaseLock();
     }
 
-    function testRunLocked()
+    public function testRunLocked()
     {
-        $app = new App;
+        $app = new App();
         $app['config']->set('site.hostname', 'example.com');
         $redis = Mockery::mock();
         $redis->shouldReceive('setnx')->withArgs(['example.com:cron.module.command', 100])->andReturn(false)->once();
@@ -142,14 +144,14 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(CRON_JOB_LOCKED, $job->run(100));
     }
 
-    function testRunControllerNonExistent()
+    public function testRunControllerNonExistent()
     {
         $job = new CronJob();
         $job->module = 'non_existent';
         $this->assertEquals(CRON_JOB_CONTROLLER_NON_EXISTENT, $job->run());
     }
 
-    function testCommandNonExistent()
+    public function testCommandNonExistent()
     {
         $job = new CronJob();
         $job->module = 'test';
@@ -160,7 +162,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testCreate
      */
-    function testRunExcpetion()
+    public function testRunExcpetion()
     {
         self::$job->module = 'test';
         self::$job->command = 'exception';
@@ -171,7 +173,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testCreate
      */
-    function testRunSuccess()
+    public function testRunSuccess()
     {
         self::$job->module = 'test';
         self::$job->command = 'success';
@@ -182,7 +184,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testCreate
      */
-    function testRunSuccessWithUrl()
+    public function testRunSuccessWithUrl()
     {
         self::$job->module = 'test';
         self::$job->command = 'success';

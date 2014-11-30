@@ -3,7 +3,7 @@
 use Phinx\Migration\AbstractMigration;
 
 class CronJobRemoveLocked extends AbstractMigration
-{   
+{
     /**
      * Migrate Up.
      */
@@ -19,6 +19,5 @@ class CronJobRemoveLocked extends AbstractMigration
      */
     public function down()
     {
-
     }
 }

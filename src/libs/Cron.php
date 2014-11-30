@@ -16,12 +16,12 @@ use app\cron\models\CronJob;
 class Cron
 {
     /**
-	 * Checks the cron schedule and runs tasks
-	 *
-	 * @param boolean $echoOutput echoes output
-	 *
-	 * @return boolean true if all tasks ran successfully
-	 */
+     * Checks the cron schedule and runs tasks
+     *
+     * @param boolean $echoOutput echoes output
+     *
+     * @return boolean true if all tasks ran successfully
+     */
     public static function scheduleCheck($echoOutput = false)
     {
         if ($echoOutput) {
@@ -43,14 +43,14 @@ class Cron
             if ($echoOutput) {
                 if ($result == CRON_JOB_LOCKED) {
                     echo "{$job->module}.{$job->command} locked!\n";
-                } else if ($result == CRON_JOB_CONTROLLER_NON_EXISTENT) {
+                } elseif ($result == CRON_JOB_CONTROLLER_NON_EXISTENT) {
                     echo "{$job->module} does not exist\n";
-                } else if ($result == CRON_JOB_METHOD_NON_EXISTENT) {
+                } elseif ($result == CRON_JOB_METHOD_NON_EXISTENT) {
                     echo "{$job->module}\-\>{$job->command}() does not exist\n";
-                } else if ($result == CRON_JOB_FAILED) {
+                } elseif ($result == CRON_JOB_FAILED) {
                     echo "$output\n";
                     echo "-- Failed!\n";
-                } else if ($result == CRON_JOB_SUCCESS) {
+                } elseif ($result == CRON_JOB_SUCCESS) {
                     echo "$output\n";
                     echo "-- Success!\n";
                 }
