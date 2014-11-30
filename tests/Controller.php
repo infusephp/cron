@@ -2,7 +2,7 @@
 
 namespace app\test;
 
-class TestController
+class Controller
 {
     public function exception()
     {

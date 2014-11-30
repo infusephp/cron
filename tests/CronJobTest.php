@@ -18,7 +18,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
 
     public static function setUpBeforeClass()
     {
-        include_once 'TestController.php';
+        include_once 'Controller.php';
 
         TestBootstrap::app('db')->delete('CronJobs')->where('module', 'test')->execute();
     }
