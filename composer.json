@@ -22,8 +22,8 @@
 		"php": ">=5.4.0"
 	},
 	"require-dev": {
-		"infusephp/bootstrap": "~1.1",
-		"infusephp/auth": "~1.0",
+		"infuse/bootstrap": "~1.1",
+		"infuse/auth": "~1.0",
 		"satooshi/php-coveralls": "0.6.1",
 		"robmorgan/phinx": "~0.3",
 		"mockery/mockery": "0.9.1"
