@@ -1,11 +1,13 @@
-framework-cron [![Build Status](https://travis-ci.org/idealistsoft/framework-cron.png?branch=master)](https://travis-ci.org/idealistsoft/framework-cron)
+cron
 ==============
 
-[![Coverage Status](https://coveralls.io/repos/idealistsoft/framework-cron/badge.png)](https://coveralls.io/r/idealistsoft/framework-cron)
-[![Latest Stable Version](https://poser.pugx.org/idealistsoft/framework-cron/v/stable.png)](https://packagist.org/packages/idealistsoft/framework-cron)
-[![Total Downloads](https://poser.pugx.org/idealistsoft/framework-cron/downloads.png)](https://packagist.org/packages/idealistsoft/framework-cron)
+[![Build Status](https://travis-ci.org/infusephp/cron.png?branch=master)](https://travis-ci.org/infusephp/cron)
+[![Coverage Status](https://coveralls.io/repos/infusephp/cron/badge.png)](https://coveralls.io/r/infusephp/cron)
+[![Latest Stable Version](https://poser.pugx.org/infuse/cron/v/stable.png)](https://packagist.org/packages/infuse/cron)
+[![Total Downloads](https://poser.pugx.org/infuse/cron/downloads.png)](https://packagist.org/packages/infuse/cron)
+[![HHVM Status](http://hhvm.h4cc.de/badge/infuse/cron.svg)](http://hhvm.h4cc.de/package/infuse/cron)
 
-Schedule tasks module for Idealist Framework
+Schedule tasks module for Infuse Framework
 
 ## Installation
 
