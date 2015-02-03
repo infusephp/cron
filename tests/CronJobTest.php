@@ -61,7 +61,8 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
             'week' => '0', ];
 
         // should be the next Monday that is the first day of the month at 12:00
-        $expected = mktime(0, 0, 0, date('m'), 1, date('Y'));
+        // TODO this fails when ran on a Monday
+        $expected = mktime(0, 0, 0, date('n'), 1, date('Y'));
         while (date('D', $expected) != 'Mon') {
             $expected = strtotime('+1 month', $expected);
         }
