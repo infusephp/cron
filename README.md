@@ -11,7 +11,11 @@ Schedule tasks module for Infuse Framework
 
 ## Installation
 
-1. Add the composer package in the require section of your app's `composer.json` and run `composer update`
+1. Install the package with [composer](http://getcomposer.org):
+
+```
+composer require infuse/cron
+```
 
 2. Add cron jobs to the `cron` section of your app's configuration:
 ```php
