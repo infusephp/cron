@@ -20,7 +20,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         include_once 'Controller.php';
 
-        Test::$app('db')->delete('CronJobs')->where('module', 'test')->execute();
+        Test::$app['db']->delete('CronJobs')->where('module', 'test')->execute();
     }
 
     public function setUp()
@@ -37,7 +37,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         $job = new CronJob();
 
-        $this->assertFalse($job->can('create', Test::$app('user')));
+        $this->assertFalse($job->can('create', Test::$app['user']));
     }
 
     public function testCalcNextRun()
@@ -189,7 +189,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$job->module = 'test';
         self::$job->command = 'success';
         self::$functions->shouldReceive('file_get_contents')->with('http://webhook.example.com/?m=test')->once();
-        Test::$app('config')->set('site.production-level', true);
+        Test::$app['config']->set('site.production-level', true);
         $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
         $this->assertEquals("test", self::$job->last_run_output);
     }
