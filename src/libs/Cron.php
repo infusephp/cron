@@ -1,10 +1,12 @@
 <?php
 
 /**
- * @package infuse\framework
  * @author Jared King <j@jaredtking.com>
+ *
  * @link http://jaredtking.com
+ *
  * @version 0.1.16
+ *
  * @copyright 2013 Jared King
  * @license MIT
  */
@@ -16,7 +18,7 @@ use app\cron\models\CronJob;
 class Cron
 {
     /**
-     * Checks the cron schedule and runs tasks
+     * Checks the cron schedule and runs tasks.
      *
      * @param boolean $echoOutput echoes output
      *
@@ -48,10 +50,14 @@ class Cron
                 } elseif ($result == CRON_JOB_METHOD_NON_EXISTENT) {
                     echo "{$job->module}\-\>{$job->command}() does not exist\n";
                 } elseif ($result == CRON_JOB_FAILED) {
-                    echo "$output\n";
+                    if ($output) {
+                        echo "$output\n";
+                    }
                     echo "-- Failed!\n";
                 } elseif ($result == CRON_JOB_SUCCESS) {
-                    echo "$output\n";
+                    if ($output) {
+                        echo "$output\n";
+                    }
                     echo "-- Success!\n";
                 }
             }
