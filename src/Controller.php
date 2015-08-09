@@ -10,12 +10,14 @@ class Controller
 
     public static $properties = [
         'models' => [ 'CronJob' ],
-        'routes' => [
-            'get /cron/scheduleCheck' => 'checkSchedule',
-        ],
     ];
 
     public static $scaffoldAdmin;
+
+    public function middleware($req, $res)
+    {
+        $this->app->get('/cron/scheduleCheck', 'checkSchedule');
+    }
 
     public function checkSchedule($req, $res)
     {
