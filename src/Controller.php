@@ -16,7 +16,7 @@ class Controller
 
     public function middleware($req, $res)
     {
-        $this->app->get('/cron/scheduleCheck', 'checkSchedule');
+        $this->app->get('/cron/scheduleCheck', ['cron\\Controller', 'checkSchedule']);
     }
 
     public function checkSchedule($req, $res)
