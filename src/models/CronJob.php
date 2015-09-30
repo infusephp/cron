@@ -29,25 +29,22 @@ class CronJob extends ACLModel
 
     public static $properties = [
         'module' => [
-            'type' => 'string',
             'required' => true,
         ],
         'command' => [
-            'type' => 'string',
             'required' => true,
         ],
         'last_ran' => [
-            'type' => 'number',
+            'type' => Model::TYPE_NUMBER,
             'null' => true,
             'admin_type' => 'datepicker',
         ],
         'last_run_result' => [
-            'type' => 'boolean',
+            'type' => Model::TYPE_BOOLEAN,
             'null' => true,
             'admin_type' => 'checkbox',
         ],
         'last_run_output' => [
-            'type' => 'string',
             'null' => true,
             'admin_type' => 'textarea',
             'admin_hidden_property' => true,
