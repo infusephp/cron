@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @author Jared King <j@jaredtking.com>
+ *
+ * @link http://jaredtking.com
+ *
+ * @copyright 2015 Jared King
+ * @license MIT
+ */
 namespace app\cron;
 
 use app\cron\libs\Cron;
@@ -9,7 +17,7 @@ class Controller
     use \InjectApp;
 
     public static $properties = [
-        'models' => [ 'CronJob' ],
+        'models' => ['CronJob'],
     ];
 
     public static $scaffoldAdmin;
@@ -44,8 +52,8 @@ class Controller
 
         // Create a message
         $message = \Swift_Message::newInstance($subject)
-          ->setFrom([ $this->app[ 'config' ]->get('site.email') => $this->app[ 'config' ]->get('site.title') ])
-          ->setTo([ $this->app[ 'config' ]->get('site.email') => $this->app[ 'config' ]->get('site.title') ])
+          ->setFrom([$this->app[ 'config' ]->get('site.email') => $this->app[ 'config' ]->get('site.title')])
+          ->setTo([$this->app[ 'config' ]->get('site.email') => $this->app[ 'config' ]->get('site.title')])
           ->setBody(nl2br($body), 'text/html')
           ->addPart(strip_tags($body), 'text/plain');
 

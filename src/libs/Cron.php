@@ -5,12 +5,9 @@
  *
  * @link http://jaredtking.com
  *
- * @version 0.1.16
- *
- * @copyright 2013 Jared King
+ * @copyright 2015 Jared King
  * @license MIT
  */
-
 namespace app\cron\libs;
 
 use app\cron\models\CronJob;
@@ -20,9 +17,9 @@ class Cron
     /**
      * Checks the cron schedule and runs tasks.
      *
-     * @param boolean $echoOutput echoes output
+     * @param bool $echoOutput echoes output
      *
-     * @return boolean true if all tasks ran successfully
+     * @return bool true if all tasks ran successfully
      */
     public static function scheduleCheck($echoOutput = false)
     {

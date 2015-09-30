@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @author Jared King <j@jaredtking.com>
+ *
+ * @link http://jaredtking.com
+ *
+ * @copyright 2015 Jared King
+ * @license MIT
+ */
 namespace app\cron\models;
 
 use Mockery;
@@ -179,7 +187,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$job->module = 'test';
         self::$job->command = 'success';
         $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
-        $this->assertEquals("test", self::$job->last_run_output);
+        $this->assertEquals('test', self::$job->last_run_output);
     }
 
     /**
@@ -192,6 +200,6 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$functions->shouldReceive('file_get_contents')->with('http://webhook.example.com/?m=test')->once();
         Test::$app['config']->set('site.production-level', true);
         $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
-        $this->assertEquals("test", self::$job->last_run_output);
+        $this->assertEquals('test', self::$job->last_run_output);
     }
 }

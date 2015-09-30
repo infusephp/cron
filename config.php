@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @author Jared King <j@jaredtking.com>
+ *
+ * @link http://jaredtking.com
+ *
+ * @copyright 2015 Jared King
+ * @license MIT
+ */
+
 /* This configuration is used to run the tests */
 
 return  [
@@ -37,7 +46,7 @@ return  [
     ],
     [
       'module' => 'test',
-      'command' => 'test2'
+      'command' => 'test2',
     ],
-  ]
+  ],
 ];

@@ -5,15 +5,13 @@
  *
  * @link http://jaredtking.com
  *
- * @version 0.1.16
- *
- * @copyright 2013 Jared King
+ * @copyright 2015 Jared King
  * @license MIT
  */
 namespace app\cron\models;
 
-use infuse\Model;
-use infuse\Model\ACLModel;
+use Infuse\Model;
+use Infuse\Model\ACLModel;
 use app\cron\libs\Cron;
 use app\cron\libs\CronDate;
 

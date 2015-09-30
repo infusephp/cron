@@ -1,14 +1,13 @@
 <?php
 
 /**
- * @package infuse\framework
  * @author Jared King <j@jaredtking.com>
+ *
  * @link http://jaredtking.com
- * @version 0.1.16
- * @copyright 2013 Jared King
+ *
+ * @copyright 2015 Jared King
  * @license MIT
  */
-
 namespace app\cron\libs;
 
 class CronDate
@@ -18,7 +17,7 @@ class CronDate
     ///////////////////////////
 
     private $myTimestamp;
-    static private $dateComponent = [
+    private static $dateComponent = [
         'second' => 's',
         'minute' => 'i',
         'hour' => 'G',
@@ -28,7 +27,7 @@ class CronDate
         'dow' => 'w',
         'timestamp' => 'U',
     ];
-    static private $weekday = [
+    private static $weekday = [
         1 => 'monday',
         2 => 'tuesday',
         3 => 'wednesday',
@@ -39,29 +38,33 @@ class CronDate
     ];
 
     /**
-    * Constructor
-    * @param int $timestamp timestamp
-    */
+     * Constructor.
+     *
+     * @param int $timestamp timestamp
+     */
     public function __construct($timestamp = null)
     {
         $this->myTimestamp = is_null($timestamp) ? time() : $timestamp;
     }
 
     /**
-    * Getter
-    * @param string $var value to get
-    * @return mixed value
-    */
+     * Getter.
+     *
+     * @param string $var value to get
+     *
+     * @return mixed value
+     */
     public function __get($var)
     {
         return date(self::$dateComponent[$var], $this->myTimestamp);
     }
 
     /**
-    * Setter
-    * @param string $var type of set to perform
-    * @param mixed $value value to set
-    */
+     * Setter.
+     *
+     * @param string $var   type of set to perform
+     * @param mixed  $value value to set
+     */
     public function __set($var, $value)
     {
         list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year'], $c['dow']) = explode(' ', date('s i G j n Y w', $this->myTimestamp));
@@ -79,10 +82,12 @@ class CronDate
     }
 
     /**
-    * Modifies the timestamp using PHP's strtotime()
-    * @param string $how date
-    * @return boolean success
-    */
+     * Modifies the timestamp using PHP's strtotime().
+     *
+     * @param string $how date
+     *
+     * @return bool success
+     */
     public function modify($how)
     {
         return $this->myTimestamp = strtotime($how, $this->myTimestamp);
