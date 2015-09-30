@@ -1,17 +1,19 @@
 <?php
 
 /**
- * @package infuse\framework
  * @author Jared King <j@jaredtking.com>
+ *
  * @link http://jaredtking.com
+ *
  * @version 0.1.16
+ *
  * @copyright 2013 Jared King
  * @license MIT
  */
-
 namespace app\cron\models;
 
 use infuse\Model;
+use infuse\Model\ACLModel;
 use app\cron\libs\Cron;
 use app\cron\libs\CronDate;
 
@@ -21,7 +23,7 @@ define('CRON_JOB_CONTROLLER_NON_EXISTENT', 3);
 define('CRON_JOB_METHOD_NON_EXISTENT', 4);
 define('CRON_JOB_FAILED', 5);
 
-class CronJob extends Model
+class CronJob extends ACLModel
 {
     public static $scaffoldApi = true;
 
@@ -58,7 +60,7 @@ class CronJob extends Model
 
     public static function idProperty()
     {
-        return [ 'module', 'command' ];
+        return ['module', 'command'];
     }
 
     protected function hasPermission($permission, Model $requester)
@@ -78,11 +80,11 @@ class CronJob extends Model
     }
 
     /**
-     * Attempts to get the global lock for this job
+     * Attempts to get the global lock for this job.
      *
      * @param int $expires time in which the lock expires
      *
-     * @return boolean
+     * @return bool
      */
     public function getLock($expires = 0)
     {
@@ -117,12 +119,12 @@ class CronJob extends Model
     }
 
     /**
-     * Runs this cron job
+     * Runs this cron job.
      *
      * @param int    $expires    time the job has to finish
      * @param string $successUrl URL to be called upon a successful run
      *
-     * @return integer result
+     * @return int result
      */
     public function run($expires = 0, $successUrl = false)
     {
@@ -181,7 +183,7 @@ class CronJob extends Model
     }
 
     /**
-     * Gets all jobs that are due to be ran and current lock values
+     * Gets all jobs that are due to be ran and current lock values.
      *
      * @return array(model => CronJob, lock => lock value)
      */
@@ -212,10 +214,10 @@ class CronJob extends Model
             }
 
             // check if model has already been created for the job
-            $model = new CronJob([$job[ 'module'], $job['command']]);
+            $model = new self([$job[ 'module'], $job['command']]);
 
             if (!$model->exists()) {
-                $model = new CronJob();
+                $model = new self();
                 $model->grantAllPermissions();
                 $model->create([
                     'module' => $job['module'],
@@ -230,7 +232,7 @@ class CronJob extends Model
     }
 
     /**
-     * Generates a timestamp from cron date parameters
+     * Generates a timestamp from cron date parameters.
      *
      * @param array $params cron date parameters (minute, hour, day, month, week)
      *
@@ -306,7 +308,7 @@ class CronJob extends Model
                     (is_null($Job['Hour']) || $Job['Hour'] == $cron_date->hour) &&
                     (is_null($Job['Day']) || $Job['Day'] == $cron_date->day) &&
                     (is_null($Job['Month']) || $Job['Month'] == $cron_date->month) &&
-                    (is_null($Job['DOW']) || $Job['DOW'] == $cron_date->dow) ? 100 : ($done+1);
+                    (is_null($Job['DOW']) || $Job['DOW'] == $cron_date->dow) ? 100 : ($done + 1);
         }
 
         return $cron_date->timestamp;
