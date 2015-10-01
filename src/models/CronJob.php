@@ -25,6 +25,8 @@ class CronJob extends ACLModel
 {
     public static $scaffoldApi = true;
 
+    public static $ids = ['module', 'command'];
+
     public static $properties = [
         'module' => [
             'required' => true,
@@ -52,11 +54,6 @@ class CronJob extends ACLModel
     ];
 
     private $hasLock;
-
-    public static function idProperty()
-    {
-        return ['module', 'command'];
-    }
 
     protected function hasPermission($permission, Model $requester)
     {
