@@ -25,9 +25,9 @@ class CronJob extends ACLModel
 {
     public static $scaffoldApi = true;
 
-    public static $ids = ['module', 'command'];
+    protected static $ids = ['module', 'command'];
 
-    public static $properties = [
+    protected static $properties = [
         'module' => [
             'required' => true,
         ],
