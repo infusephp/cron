@@ -10,8 +10,6 @@
  */
 namespace app\cron;
 
-use app\cron\libs\Cron;
-
 class Controller
 {
     use \InjectApp;
@@ -22,22 +20,10 @@ class Controller
 
     public static $scaffoldAdmin;
 
-    public function middleware($req, $res)
-    {
-        $this->app->get('/cron/scheduleCheck', ['cron\\Controller', 'checkSchedule']);
-    }
-
-    public function checkSchedule($req, $res)
-    {
-        if (!$req->isCli()) {
-            return $res->setCode(404);
-        }
-
-        Cron::scheduleCheck($this->app, true);
-    }
-
     public function test()
     {
+        // this is a sample cron job for testing purposes
+
         $t = date('h:i a');
         $subject = $this->app[ 'config' ]->get('site.title').' Cron test: '.$t;
         $body = "This is a cron job test\n$t";

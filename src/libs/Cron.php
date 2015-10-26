@@ -17,46 +17,40 @@ class Cron
     /**
      * Checks the cron schedule and runs tasks.
      *
-     * @param bool $echoOutput echoes output
+     * @param string $output append output to this variable
      *
      * @return bool true if all tasks ran successfully
      */
-    public static function scheduleCheck($echoOutput = false)
+    public static function scheduleCheck(&$output = '')
     {
-        if ($echoOutput) {
-            echo "-- Starting Cron\n";
-        }
+        $output .= "-- Starting Cron\n";
 
         $success = true;
 
         foreach (CronJob::overdueJobs() as $jobInfo) {
             $job = $jobInfo['model'];
 
-            if ($echoOutput) {
-                echo "-- Starting {$job->module}.{$job->command}:\n";
-            }
+            $output .= "-- Starting {$job->module}.{$job->command}:\n";
 
             $result = $job->run($jobInfo['expires'], $jobInfo['successUrl']);
-            $output = $job->last_run_output;
+            $jobOutput = $job->last_run_output;
 
-            if ($echoOutput) {
-                if ($result == CRON_JOB_LOCKED) {
-                    echo "{$job->module}.{$job->command} locked!\n";
-                } elseif ($result == CRON_JOB_CONTROLLER_NON_EXISTENT) {
-                    echo "{$job->module} does not exist\n";
-                } elseif ($result == CRON_JOB_METHOD_NON_EXISTENT) {
-                    echo "{$job->module}\-\>{$job->command}() does not exist\n";
-                } elseif ($result == CRON_JOB_FAILED) {
-                    if ($output) {
-                        echo "$output\n";
-                    }
-                    echo "-- Failed!\n";
-                } elseif ($result == CRON_JOB_SUCCESS) {
-                    if ($output) {
-                        echo "$output\n";
-                    }
-                    echo "-- Success!\n";
+            if ($result == CRON_JOB_LOCKED) {
+                $output .= "{$job->module}.{$job->command} locked!\n";
+            } elseif ($result == CRON_JOB_CONTROLLER_NON_EXISTENT) {
+                $output .= "{$job->module} does not exist\n";
+            } elseif ($result == CRON_JOB_METHOD_NON_EXISTENT) {
+                $output .= "{$job->module}\-\>{$job->command}() does not exist\n";
+            } elseif ($result == CRON_JOB_FAILED) {
+                if ($jobOutput) {
+                    $output .= "$jobOutput\n";
                 }
+                $output .= "-- Failed!\n";
+            } elseif ($result == CRON_JOB_SUCCESS) {
+                if ($jobOutput) {
+                    $output .= "$jobOutput\n";
+                }
+                $output .= "-- Success!\n";
             }
 
             $success = $result == CRON_JOB_SUCCESS && $success;
