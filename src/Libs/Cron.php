@@ -8,9 +8,9 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace app\cron\libs;
+namespace App\Cron\Libs;
 
-use app\cron\models\CronJob;
+use App\Cron\Models\CronJob;
 
 class Cron
 {

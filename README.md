@@ -44,7 +44,7 @@ And add the console command to run jobs to `modules.commands` in your app's conf
 	// ...
 	'commands' => [
 		// ...
-		'app\cron\console\RunScheduledCommand'
+		'App\Cron\Console\RunScheduledCommand'
 	]
 ]
 ```

@@ -8,12 +8,12 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace app\cron\models;
+namespace App\Cron\Models;
 
+use App\Cron\Libs\Cron;
+use App\Cron\Libs\CronDate;
 use Infuse\Model;
 use Infuse\Model\ACLModel;
-use app\cron\libs\Cron;
-use app\cron\libs\CronDate;
 
 define('CRON_JOB_SUCCESS', 1);
 define('CRON_JOB_LOCKED', 2);
@@ -129,7 +129,7 @@ class CronJob extends ACLModel
         $success = false;
         $output = '';
 
-        $class = '\\app\\'.$this->module.'\\Controller';
+        $class = 'App\\'.$this->module.'\\Controller';
 
         if (class_exists($class)) {
             try {

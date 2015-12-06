@@ -8,7 +8,7 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace app\cron\models;
+namespace App\Cron\Models;
 
 use Mockery;
 use App;
