@@ -22,11 +22,10 @@
 		"php": ">=5.4.0"
 	},
 	"require-dev": {
-		"infuse/bootstrap": "dev-master",
-		"infuse/auth": "~1.0",
+		"infuse/infuse": "dev-master",
+		"pulsar/pulsar": "0.1",
 		"satooshi/php-coveralls": "0.6.1",
 		"robmorgan/phinx": "~0.3",
 		"mockery/mockery": "0.9.1"
-	},
-	"minimum-stability": "dev"
+	}
 }

@@ -12,8 +12,7 @@ namespace App\Cron\Models;
 
 use App\Cron\Libs\Cron;
 use App\Cron\Libs\CronDate;
-use Infuse\Model;
-use Infuse\Model\ACLModel;
+use Pulsar\Model;
 
 define('CRON_JOB_SUCCESS', 1);
 define('CRON_JOB_LOCKED', 2);
@@ -21,7 +20,7 @@ define('CRON_JOB_CONTROLLER_NON_EXISTENT', 3);
 define('CRON_JOB_METHOD_NON_EXISTENT', 4);
 define('CRON_JOB_FAILED', 5);
 
-class CronJob extends ACLModel
+class CronJob extends Model
 {
     public static $scaffoldApi = true;
 
@@ -55,11 +54,6 @@ class CronJob extends ACLModel
 
     private $hasLock;
 
-    protected function hasPermission($permission, Model $requester)
-    {
-        return $requester->isAdmin();
-    }
-
     public function __construct($id = false)
     {
         parent::__construct($id);
@@ -67,7 +61,7 @@ class CronJob extends ACLModel
 
     public function lockName()
     {
-        return $this->app['config']->get('site.hostname').':'.
+        return $this->app['config']->get('app.hostname').':'.
             'cron.'.$this->module.'.'.$this->command;
     }
 
@@ -165,7 +159,7 @@ class CronJob extends ACLModel
             'last_run_output' => $output, ]);
 
         // ping the success URL
-        if ($success && $successUrl && $this->app['config']->get('site.production-level')) {
+        if ($success && $successUrl && $this->app['config']->get('app.production-level')) {
             file_get_contents($successUrl.'?m='.urlencode($output));
         }
 

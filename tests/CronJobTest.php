@@ -11,8 +11,8 @@
 namespace App\Cron\Models;
 
 use Mockery;
-use App;
-use Test;
+use Infuse\Application;
+use Infuse\Test;
 
 function file_get_contents($cmd)
 {
@@ -31,21 +31,14 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         Test::$app['db']->delete('CronJobs')->where('module', 'test')->execute();
     }
 
-    public function setUp()
-    {
-        self::$functions = Mockery::mock();
-    }
-
     public static function tearDownAfterClass()
     {
         self::$job->delete();
     }
 
-    public function testHasPermission()
+    public function setUp()
     {
-        $job = new CronJob();
-
-        $this->assertFalse($job->can('create', Test::$app['user']));
+        self::$functions = Mockery::mock();
     }
 
     public function testCalcNextRun()
@@ -122,8 +115,8 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job = new CronJob();
         $this->assertTrue($job->getLock());
 
-        $app = new App();
-        $app['config']->set('site.hostname', 'example.com');
+        $app = new Application();
+        $app['config']->set('app.hostname', 'example.com');
         $redis = Mockery::mock();
         $redis->shouldReceive('setnx')->withArgs(['example.com:cron.module.command', 100])->andReturn(true)->once();
         $redis->shouldReceive('del')->withArgs(['example.com:cron.module.command'])->andReturn(true)->once();
@@ -140,8 +133,8 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
 
     public function testRunLocked()
     {
-        $app = new App();
-        $app['config']->set('site.hostname', 'example.com');
+        $app = new Application();
+        $app['config']->set('app.hostname', 'example.com');
         $redis = Mockery::mock();
         $redis->shouldReceive('setnx')->withArgs(['example.com:cron.module.command', 100])->andReturn(false)->once();
         $app['redis'] = $redis;
@@ -198,7 +191,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$job->module = 'test';
         self::$job->command = 'success';
         self::$functions->shouldReceive('file_get_contents')->with('http://webhook.example.com/?m=test')->once();
-        Test::$app['config']->set('site.production-level', true);
+        Test::$app['config']->set('app.production-level', true);
         $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
         $this->assertEquals('test', self::$job->last_run_output);
     }

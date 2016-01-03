@@ -12,14 +12,6 @@
 /* This configuration is used to run the tests */
 
 return  [
-  'site' => [
-    'salt' => 'replacewithrandomstring',
-  ],
-  'modules' => [
-    'middleware' => [
-      'auth',
-    ],
-  ],
   'database' => [
     'type' => 'mysql',
     'user' => 'root',

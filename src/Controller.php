@@ -10,9 +10,11 @@
  */
 namespace App\Cron;
 
+use Infuse\HasApp;
+
 class Controller
 {
-    use \InjectApp;
+    use HasApp;
 
     public static $properties = [
         'models' => ['CronJob'],
@@ -25,7 +27,7 @@ class Controller
         // this is a sample cron job for testing purposes
 
         $t = date('h:i a');
-        $subject = $this->app[ 'config' ]->get('site.title').' Cron test: '.$t;
+        $subject = $this->app[ 'config' ]->get('app.title').' Cron test: '.$t;
         $body = "This is a cron job test\n$t";
 
         // Create the Transport
@@ -38,8 +40,8 @@ class Controller
 
         // Create a message
         $message = \Swift_Message::newInstance($subject)
-          ->setFrom([$this->app[ 'config' ]->get('site.email') => $this->app[ 'config' ]->get('site.title')])
-          ->setTo([$this->app[ 'config' ]->get('site.email') => $this->app[ 'config' ]->get('site.title')])
+          ->setFrom([$this->app[ 'config' ]->get('app.email') => $this->app[ 'config' ]->get('app.title')])
+          ->setTo([$this->app[ 'config' ]->get('app.email') => $this->app[ 'config' ]->get('app.title')])
           ->setBody(nl2br($body), 'text/html')
           ->addPart(strip_tags($body), 'text/plain');
 
