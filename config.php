@@ -12,6 +12,14 @@
 /* This configuration is used to run the tests */
 
 return  [
+  'services' => [
+    'db' => 'Infuse\Services\Database',
+    'model_driver' => 'Infuse\Services\ModelDriver',
+    'pdo' => 'Infuse\Services\Pdo',
+  ],
+  'models' => [
+    'driver' => 'Pulsar\Driver\DatabaseDriver',
+  ],
   'database' => [
     'type' => 'mysql',
     'user' => 'root',
