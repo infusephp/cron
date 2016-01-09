@@ -1,11 +1,11 @@
 cron
 ==============
 
-[![Build Status](https://travis-ci.org/infusephp/cron.png?branch=master)](https://travis-ci.org/infusephp/cron)
-[![Coverage Status](https://coveralls.io/repos/infusephp/cron/badge.png)](https://coveralls.io/r/infusephp/cron)
-[![Latest Stable Version](https://poser.pugx.org/infuse/cron/v/stable.png)](https://packagist.org/packages/infuse/cron)
-[![Total Downloads](https://poser.pugx.org/infuse/cron/downloads.png)](https://packagist.org/packages/infuse/cron)
-[![HHVM Status](http://hhvm.h4cc.de/badge/infuse/cron.svg)](http://hhvm.h4cc.de/package/infuse/cron)
+[![Build Status](https://travis-ci.org/infusephp/cron.svg?branch=master&style=flat)](https://travis-ci.org/infusephp/cron)
+[![Coverage Status](https://coveralls.io/repos/infusephp/cron/badge.svg?style=flat)](https://coveralls.io/r/infusephp/cron)
+[![Latest Stable Version](https://poser.pugx.org/infuse/cron/v/stable.svg?style=flat)](https://packagist.org/packages/infuse/cron)
+[![Total Downloads](https://poser.pugx.org/infuse/cron/downloads.svg?style=flat)](https://packagist.org/packages/infuse/cron)
+[![HHVM Status](http://hhvm.h4cc.de/badge/infuse/cron.svg?style=flat)](http://hhvm.h4cc.de/package/infuse/cron)
 
 Schedule tasks module for Infuse Framework
 
