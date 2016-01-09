@@ -48,18 +48,20 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
             'hour' => '*',
             'day' => '*',
             'month' => '*',
-            'week' => '*', ];
+            'week' => '*',
+        ];
 
         // should be the next minute
         $expected = floor(time() / 60) * 60;
         $this->assertEquals($expected, CronJob::calcNextRun($input));
 
         $input = [
-            'minute' => '0',
-            'hour' => '0',
-            'day' => '0',
-            'month' => '0',
-            'week' => '0', ];
+            'minute' => 0,
+            'hour' => 0,
+            'day' => 1,
+            'month' => 0,
+            'week' => 0,
+        ];
 
         // should be the next Monday that is the first day of the month at 12:00
         // TODO this fails when ran on a Monday
