@@ -38,9 +38,9 @@ composer require infuse/cron
 ]
 ```
 
-And add the console command to run jobs to `modules.commands` in your app's configuration:
+And add the console command to run jobs to `console.commands` in your app's configuration:
 ```php
-'modules' => [
+'console' => [
 	// ...
 	'commands' => [
 		// ...
