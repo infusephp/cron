@@ -74,7 +74,6 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     public function testCreate()
     {
         self::$job = new CronJob();
-        self::$job->grantAllPermissions();
         $this->assertTrue(self::$job->create([
             'module' => 'test',
             'command' => 'test', ]));

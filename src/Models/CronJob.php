@@ -204,7 +204,6 @@ class CronJob extends Model
 
             if (!$model->exists()) {
                 $model = new self();
-                $model->grantAllPermissions();
                 $model->create([
                     'module' => $job['module'],
                     'command' => $job['command'], ]);
