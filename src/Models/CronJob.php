@@ -12,6 +12,7 @@ namespace App\Cron\Models;
 
 use App\Cron\Libs\Cron;
 use App\Cron\Libs\CronDate;
+use Infuse\Application;
 use Pulsar\Model;
 
 define('CRON_JOB_SUCCESS', 1);
@@ -175,7 +176,8 @@ class CronJob extends Model
      */
     public static function overdueJobs()
     {
-        $jobsFromConfig = (array) self::$injectedApp['config']->get('cron');
+        $app = Application::getDefault();
+        $jobsFromConfig = (array) $app['config']->get('cron');
 
         $jobs = [];
 
