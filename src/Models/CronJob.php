@@ -161,7 +161,7 @@ class CronJob extends Model
 
         // ping the success URL
         if ($success && $successUrl && $this->app['config']->get('app.production-level')) {
-            file_get_contents($successUrl.'?m='.urlencode($output));
+            @file_get_contents($successUrl.'?m='.urlencode($output));
         }
 
         $this->releaseLock();
