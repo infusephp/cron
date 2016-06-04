@@ -62,7 +62,7 @@ class CronJob extends Model
 
     public function lockName()
     {
-        return $this->app['config']->get('app.hostname').':'.
+        return $this->getApp()['config']->get('app.hostname').':'.
             'cron.'.$this->module.'.'.$this->command;
     }
 
@@ -80,7 +80,7 @@ class CronJob extends Model
             return true;
         }
 
-        $r = $this->app['redis'];
+        $r = $this->getApp()['redis'];
         $lock = $this->lockName();
 
         if ($r->setnx($lock, $expires)) {
@@ -100,7 +100,7 @@ class CronJob extends Model
             return;
         }
 
-        $this->app['redis']->del($this->lockName());
+        $this->getApp()['redis']->del($this->lockName());
 
         $this->hasLock = false;
     }
@@ -120,6 +120,8 @@ class CronJob extends Model
             return CRON_JOB_LOCKED;
         }
 
+        $app = $this->getApp();
+
         // attempt to execute the job
         $success = false;
         $output = '';
@@ -133,7 +135,7 @@ class CronJob extends Model
                 $controller = new $class();
 
                 if (method_exists($controller, 'injectApp')) {
-                    $controller->injectApp($this->app);
+                    $controller->injectApp($app);
                 }
 
                 $command = $this->command;
@@ -160,7 +162,7 @@ class CronJob extends Model
             'last_run_output' => $output, ]);
 
         // ping the success URL
-        if ($success && $successUrl && $this->app['config']->get('app.production-level')) {
+        if ($success && $successUrl && $app['config']->get('app.production-level')) {
             @file_get_contents($successUrl.'?m='.urlencode($output));
         }
 
