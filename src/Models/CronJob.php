@@ -134,8 +134,8 @@ class CronJob extends Model
 
                 $controller = new $class();
 
-                if (method_exists($controller, 'injectApp')) {
-                    $controller->injectApp($app);
+                if (method_exists($controller, 'setApp')) {
+                    $controller->setApp($app);
                 }
 
                 $command = $this->command;
