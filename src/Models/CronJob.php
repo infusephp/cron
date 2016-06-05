@@ -55,11 +55,6 @@ class CronJob extends Model
 
     private $hasLock;
 
-    public function __construct($id = false)
-    {
-        parent::__construct($id);
-    }
-
     public function lockName()
     {
         return $this->getApp()['config']->get('app.hostname').':'.
