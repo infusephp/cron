@@ -12,6 +12,9 @@ namespace App\Cron;
 
 use Infuse\HasApp;
 
+/**
+ * @codeCoverageIgnore
+ */
 class Controller
 {
     use HasApp;

@@ -19,9 +19,6 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
           'command' => 'success_with_url',
           'minute' => 0,
           'hour' => 0,
-          'day' => '*',
-          'month' => '*',
-          'week' => '*',
         ],
         [
           'module' => 'test',
@@ -68,5 +65,11 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
         $schedule = new JobSchedule(self::$jobs);
 
         $this->assertTrue($schedule->run($output));
+
+        // running the schedule should remove the
+        // `success_with_url` job from the schedule
+        $jobs = $schedule->getScheduledJobs();
+        $this->assertCount(1, $jobs);
+        $this->assertEquals('success', $jobs[0]['model']->command);
     }
 }

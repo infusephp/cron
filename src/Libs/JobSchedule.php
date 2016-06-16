@@ -41,34 +41,33 @@ class JobSchedule
     /**
      * Gets all of the jobs scheduled to run, now.
      *
-     * @return array(model => CronJob)
+     * @return array array(model => CronJob)
      */
     public function getScheduledJobs()
     {
-        // round current time down to nearest minute
-        $start = floor(time() / 60) * 60;
-
         $jobs = [];
         foreach ($this->jobs as $job) {
-            // check if scheduled to run
-            $params = new DateParameters($job);
-            $date = new CronDate($params);
-            if ($date->getNextRun() > $start) {
-                continue;
-            }
-
-            $job = array_replace([
-                'successUrl' => '',
-                'expires' => 0, ], $job);
-
-            // check if model has already been created for the job
             $model = new CronJob([$job['module'], $job['command']]);
 
+            // create a new model if this is the job's first run
             if (!$model->exists()) {
                 $model = new CronJob();
                 $model->module = $job['module'];
                 $model->command = $job['command'];
             }
+
+            // check if scheduled to run
+            $params = new DateParameters($job);
+            $date = new CronDate($params, $model->last_ran);
+
+            if ($date->getNextRun() > time()) {
+                continue;
+            }
+
+            $job = array_replace([
+                'successUrl' => '',
+                'expires' => 0,
+            ], $job);
 
             $job['model'] = $model;
             $jobs[] = $job;
@@ -86,8 +85,6 @@ class JobSchedule
      */
     public function run(OutputInterface $output)
     {
-        $output->writeln('-- Starting Cron');
-
         $success = true;
 
         foreach ($this->getScheduledJobs() as $jobInfo) {
@@ -119,7 +116,7 @@ class JobSchedule
             $output->writeln($job->last_run_output);
             $output->writeln('-- Success!');
         } elseif ($result == CronJob::LOCKED) {
-            $output->writeln("{$job->module}.{$job->command} locked!");
+            $output->writeln("{$job->module}.{$job->command} is locked!");
         } elseif ($result == CronJob::FAILED) {
             $output->writeln($job->last_run_output);
             $output->writeln('-- Failed!');

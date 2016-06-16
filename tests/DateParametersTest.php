@@ -24,7 +24,7 @@ class DateParametersTest extends PHPUnit_Framework_TestCase
 
     public function testWithSetting()
     {
-        $date = new DateParameters(['minute' => 10]);
+        $date = new DateParameters(['minute' => 10, 'hour' => '*']);
         $this->assertEquals(10, $date->minute);
         $this->assertEquals('*', $date->hour);
         $this->assertEquals('*', $date->week);

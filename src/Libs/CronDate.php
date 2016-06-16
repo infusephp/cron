@@ -55,12 +55,12 @@ class CronDate
 
     /**
      * @param DateParameters $params date parameters
-     * @param int            $start  start timestamp
+     * @param int|false      $start  start timestamp
      */
-    public function __construct(DateParameters $params, $start = null)
+    public function __construct(DateParameters $params, $start = false)
     {
         $this->params = $params;
-        $this->start = is_null($start) ? time() : $start;
+        $this->start = ($start === false) ? time() : $start;
         $this->nextRun = $this->start;
 
         $this->calculate();
@@ -105,8 +105,8 @@ class CronDate
 
         $iters = 0;
         $maxIters = 100;
-        while ($iters < $maxIters) {
-            if ($this->params->minute != '*' && ($this->minute != $this->params->minute)) {
+        while ($iters < $maxIters && !$this->satisfied()) {
+            if ($this->params->minute !== '*' && ($this->minute != $this->params->minute)) {
                 if ($this->minute > $this->params->minute) {
                     $this->modify('+1 hour');
                 }
@@ -114,7 +114,7 @@ class CronDate
                 $this->minute = $this->params->minute;
             }
 
-            if ($this->params->hour != '*' && ($this->hour != $this->params->hour)) {
+            if ($this->params->hour !== '*' && ($this->hour != $this->params->hour)) {
                 if ($this->hour > $this->params->hour) {
                     $this->modify('+1 day');
                 }
@@ -123,13 +123,13 @@ class CronDate
                 $this->minute = 0;
             }
 
-            if ($this->params->week != '*' && ($this->week != $this->params->week)) {
+            if ($this->params->week !== '*' && ($this->week != $this->params->week)) {
                 $this->week = $this->params->week;
                 $this->hour = 0;
                 $this->minute = 0;
             }
 
-            if ($this->params->day != '*' && ($this->day != $this->params->day)) {
+            if ($this->params->day !== '*' && ($this->day != $this->params->day)) {
                 if ($this->day > $this->params->day) {
                     $this->modify('+1 month');
                 }
@@ -139,7 +139,7 @@ class CronDate
                 $this->minute = 0;
             }
 
-            if ($this->params->month != '*' && ($this->month != $this->params->month)) {
+            if ($this->params->month !== '*' && ($this->month != $this->params->month)) {
                 if ($this->month > $this->params->month) {
                     $this->modify('+1 year');
                 }
@@ -151,15 +151,22 @@ class CronDate
             }
 
             ++$iters;
-
-            if (($this->params->minute == '*' || $this->params->minute == $this->minute) &&
-                ($this->params->hour == '*' || $this->params->hour == $this->hour) &&
-                ($this->params->day == '*' || $this->params->day == $this->day) &&
-                ($this->params->month == '*' || $this->params->month == $this->month) &&
-                ($this->params->week == '*' || $this->params->week == $this->week)) {
-                $iters = $maxIters;
-            }
         }
+    }
+
+    /**
+     * Checks if the calculated next run timestamp
+     * satisfies the date parameters.
+     *
+     * @return bool
+     */
+    private function satisfied()
+    {
+        return ($this->params->minute === '*' || $this->params->minute == $this->minute) &&
+               ($this->params->hour === '*' || $this->params->hour == $this->hour) &&
+               ($this->params->day === '*' || $this->params->day == $this->day) &&
+               ($this->params->month === '*' || $this->params->month == $this->month) &&
+               ($this->params->week === '*' || $this->params->week == $this->week);
     }
 
     /**
@@ -179,14 +186,15 @@ class CronDate
 
     public function __set($var, $value)
     {
-        list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year'], $c['week']) = explode(' ', date('s i G j n Y w', $this->nextRun));
-        switch ($var) {
-            case 'week':
-                $this->nextRun = strtotime(self::$weekday[$value], $this->nextRun);
-                break;
-            default:
-                $c[$var] = $value;
-                $this->nextRun = mktime($c['hour'], $c['minute'], $c['second'], $c['month'], $c['day'], $c['year']);
-            }
+        if ($var == 'week') {
+            $this->nextRun = strtotime(self::$weekday[$value], $this->nextRun);
+
+            return;
+        }
+
+        list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year']) = explode(' ', date('s i G j n Y', $this->nextRun));
+
+        $c[$var] = $value;
+        $this->nextRun = mktime($c['hour'], $c['minute'], $c['second'], $c['month'], $c['day'], $c['year']);
     }
 }
