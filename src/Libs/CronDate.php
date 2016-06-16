@@ -22,8 +22,7 @@ class CronDate
         'day' => 'j',
         'month' => 'n',
         'year' => 'Y',
-        'dow' => 'w',
-        'timestamp' => 'U',
+        'week' => 'w',
    ];
 
     /**
@@ -42,7 +41,7 @@ class CronDate
     /**
      * @var DateParameters
      */
-    private $dateParams;
+    private $params;
 
     /**
      * @var int
@@ -60,7 +59,7 @@ class CronDate
      */
     public function __construct(DateParameters $params, $start = null)
     {
-        $this->dateParams = $params;
+        $this->params = $params;
         $this->start = is_null($start) ? time() : $start;
         $this->nextRun = $this->start;
 
@@ -74,7 +73,7 @@ class CronDate
      */
     public function getDateParameters()
     {
-        return $this->dateParams;
+        return $this->params;
     }
 
     /**
@@ -104,73 +103,62 @@ class CronDate
     {
         $this->second = 0;
 
-        $params = [
-            'minute' => $this->dateParams->minute,
-            'hour' => $this->dateParams->hour,
-            'week' => $this->dateParams->week,
-            'day' => $this->dateParams->day,
-            'month' => $this->dateParams->month,
-        ];
-
-        if ($params['minute'] == '*') {
-            $params['minute'] = null;
-        }
-        if ($params['hour'] == '*') {
-            $params['hour'] = null;
-        }
-        if ($params['week'] == '*') {
-            $params['week'] = null;
-        }
-        if ($params['day'] == '*') {
-            $params['day'] = null;
-        }
-        if ($params['month'] == '*') {
-            $params['month'] = null;
-        }
-
-        $done = 0;
-        while ($done < 100) {
-            if (!is_null($params['minute']) && ($this->minute != $params['minute'])) {
-                if ($this->minute > $params['minute']) {
+        $iters = 0;
+        $maxIters = 100;
+        while ($iters < $maxIters) {
+            if ($this->params->minute != '*' && ($this->minute != $this->params->minute)) {
+                if ($this->minute > $this->params->minute) {
                     $this->modify('+1 hour');
                 }
-                $this->minute = $params['minute'];
+
+                $this->minute = $this->params->minute;
             }
-            if (!is_null($params['hour']) && ($this->hour != $params['hour'])) {
-                if ($this->hour > $params['hour']) {
+
+            if ($this->params->hour != '*' && ($this->hour != $this->params->hour)) {
+                if ($this->hour > $this->params->hour) {
                     $this->modify('+1 day');
                 }
-                $this->hour = $params['hour'];
+
+                $this->hour = $this->params->hour;
                 $this->minute = 0;
             }
-            if (!is_null($params['week']) && ($this->dow != $params['week'])) {
-                $this->dow = $params['week'];
+
+            if ($this->params->week != '*' && ($this->week != $this->params->week)) {
+                $this->week = $this->params->week;
                 $this->hour = 0;
                 $this->minute = 0;
             }
-            if (!is_null($params['day']) && ($this->day != $params['day'])) {
-                if ($this->day > $params['day']) {
+
+            if ($this->params->day != '*' && ($this->day != $this->params->day)) {
+                if ($this->day > $this->params->day) {
                     $this->modify('+1 month');
                 }
-                $this->day = $params['day'];
+
+                $this->day = $this->params->day;
                 $this->hour = 0;
                 $this->minute = 0;
             }
-            if (!is_null($params['month']) && ($this->month != $params['month'])) {
-                if ($this->month > $params['month']) {
+
+            if ($this->params->month != '*' && ($this->month != $this->params->month)) {
+                if ($this->month > $this->params->month) {
                     $this->modify('+1 year');
                 }
-                $this->month = $params['month'];
+
+                $this->month = $this->params->month;
                 $this->day = 1;
                 $this->hour = 0;
                 $this->minute = 0;
             }
 
-            $done = (is_null($params['minute']) || $params['minute'] == $this->minute) &&
-                    (is_null($params['hour']) || $params['hour'] == $this->hour) &&
-                    (is_null($params['day']) || $params['day'] == $this->day) &&
-                    (is_null($params['month']) || $params['month'] == $this->month) &&
-                    (is_null($params['week']) || $params['week'] == $this->dow) ? 100 : ($done + 1);
+            ++$iters;
+
+            if (($this->params->minute == '*' || $this->params->minute == $this->minute) &&
+                ($this->params->hour == '*' || $this->params->hour == $this->hour) &&
+                ($this->params->day == '*' || $this->params->day == $this->day) &&
+                ($this->params->month == '*' || $this->params->month == $this->month) &&
+                ($this->params->week == '*' || $this->params->week == $this->week)) {
+                $iters = $maxIters;
+            }
         }
     }
 
@@ -191,9 +179,9 @@ class CronDate
 
     public function __set($var, $value)
     {
-        list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year'], $c['dow']) = explode(' ', date('s i G j n Y w', $this->nextRun));
+        list($c['second'], $c['minute'], $c['hour'], $c['day'], $c['month'], $c['year'], $c['week']) = explode(' ', date('s i G j n Y w', $this->nextRun));
         switch ($var) {
-            case 'dow':
+            case 'week':
                 $this->nextRun = strtotime(self::$weekday[$value], $this->nextRun);
                 break;
             default:
