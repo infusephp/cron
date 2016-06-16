@@ -16,12 +16,6 @@ class Controller
 {
     use HasApp;
 
-    public static $properties = [
-        'models' => ['CronJob'],
-   ];
-
-    public static $scaffoldAdmin;
-
     public function test()
     {
         // this is a sample cron job for testing purposes
