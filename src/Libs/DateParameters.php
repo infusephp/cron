@@ -10,6 +10,8 @@
  */
 namespace App\Cron\Libs;
 
+use InvalidArgumentException;
+
 class DateParameters
 {
     /**
@@ -29,10 +31,35 @@ class DateParameters
             'day' => '*',
             'month' => '*',
         ], $params);
+
+        $this->validate();
     }
 
     public function __get($k)
     {
         return $this->params[$k];
+    }
+
+    private function validate()
+    {
+        if ($this->params['minute'] !== '*' && !($this->params['minute'] >= 0 && $this->params['minute'] <= 59)) {
+            throw new InvalidArgumentException("Invalid minute argument: {$this->params['minute']}");
+        }
+
+        if ($this->params['hour'] !== '*' && !($this->params['hour'] >= 0 && $this->params['hour'] <= 23)) {
+            throw new InvalidArgumentException("Invalid hour argument: {$this->params['hour']}");
+        }
+
+        if ($this->params['week'] !== '*' && !($this->params['week'] >= 0 && $this->params['week'] <= 6)) {
+            throw new InvalidArgumentException("Invalid day of week argument: {$this->params['week']}");
+        }
+
+        if ($this->params['day'] !== '*' && !($this->params['day'] >= 1 && $this->params['day'] <= 31)) {
+            throw new InvalidArgumentException("Invalid day of month argument: {$this->params['day']}");
+        }
+
+        if ($this->params['month'] !== '*' && !($this->params['month'] >= 1 && $this->params['month'] <= 12)) {
+            throw new InvalidArgumentException("Invalid month argument: {$this->params['month']}");
+        }
     }
 }

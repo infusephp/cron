@@ -31,4 +31,34 @@ class DateParametersTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('*', $date->day);
         $this->assertEquals('*', $date->month);
     }
+
+    public function testInvalidMinute()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $date = new DateParameters(['minute' => 60]);
+    }
+
+    public function testInvalidHour()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $date = new DateParameters(['hour' => 24]);
+    }
+
+    public function testInvalidDayOfWeek()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $date = new DateParameters(['week' => 7]);
+    }
+
+    public function testInvalidDayOfMonth()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $date = new DateParameters(['day' => 32]);
+    }
+
+    public function testInvalidMonth()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $date = new DateParameters(['month' => 13]);
+    }
 }

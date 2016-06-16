@@ -55,7 +55,6 @@ class CronDateTest extends PHPUnit_Framework_TestCase
             'hour' => 0,
             'week' => 1,
             'day' => 1,
-            'month' => 0,
         ]);
         $start = mktime(0, 0, 0, 6, 16, 2016);
         $date = new CronDate($params, $start);
