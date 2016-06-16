@@ -67,7 +67,6 @@ class JobSchedule
                 $model = new CronJob();
                 $model->module = $job['module'];
                 $model->command = $job['command'];
-                $model->save();
             }
 
             $job['model'] = $model;

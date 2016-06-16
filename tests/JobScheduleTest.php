@@ -51,12 +51,17 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, $job1['hour']);
         $this->assertEquals(60, $job1['expires']);
         $this->assertEquals('http://webhook.example.com', $job1['successUrl']);
+        $this->assertInstanceOf('App\Cron\Models\CronJob', $job1['model']);
+        $this->assertEquals('test', $job1['model']->module);
+        $this->assertEquals('test', $job1['model']->command);
 
-        $this->assertEquals('test', $job1['module']);
+        $this->assertEquals('test', $job2['module']);
         $this->assertEquals('test2', $job2['command']);
         $this->assertEquals(0, $job2['expires']);
         $this->assertEquals('', $job2['successUrl']);
-        $this->assertTrue($job2['model']->exists());
+        $this->assertInstanceOf('App\Cron\Models\CronJob', $job2['model']);
+        $this->assertEquals('test', $job2['model']->module);
+        $this->assertEquals('test2', $job2['model']->command);
     }
 
     public function testRun()

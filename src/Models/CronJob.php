@@ -10,6 +10,7 @@
  */
 namespace App\Cron\Models;
 
+use App\Cron\Libs\Lock;
 use Exception;
 use Pulsar\Model;
 
@@ -21,82 +22,27 @@ class CronJob extends Model
     const METHOD_NON_EXISTENT = 4;
     const FAILED = 5;
 
-    public static $scaffoldApi = true;
-
     protected static $ids = ['module', 'command'];
 
     protected static $properties = [
         'module' => [
             'required' => true,
-       ],
+        ],
         'command' => [
             'required' => true,
-       ],
+        ],
         'last_ran' => [
-            'type' => Model::TYPE_NUMBER,
+            'type' => Model::TYPE_DATE,
             'null' => true,
-            'admin_type' => 'datepicker',
-       ],
+        ],
         'last_run_result' => [
             'type' => Model::TYPE_BOOLEAN,
             'null' => true,
-            'admin_type' => 'checkbox',
-       ],
+        ],
         'last_run_output' => [
             'null' => true,
-            'admin_type' => 'textarea',
-            'admin_hidden_property' => true,
-            'admin_html' => '<pre>{last_run_output}</pre>',
-            'admin_truncate' => false,
-       ],
-   ];
-
-    private $hasLock;
-
-    public function lockName()
-    {
-        return $this->getApp()['config']->get('app.hostname').':'.
-            'cron.'.$this->module.'.'.$this->command;
-    }
-
-    /**
-     * Attempts to get the global lock for this job.
-     *
-     * @param int $expires time in which the lock expires
-     *
-     * @return bool
-     */
-    public function getLock($expires = 0)
-    {
-        // do not lock if expiry time is 0
-        if ($expires <= 0) {
-            return true;
-        }
-
-        $r = $this->getApp()['redis'];
-        $lock = $this->lockName();
-
-        if ($r->setnx($lock, $expires)) {
-            $r->expire($lock, $expires);
-
-            $this->hasLock = true;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public function releaseLock()
-    {
-        if (!$this->hasLock) {
-            return;
-        }
-
-        $this->getApp()['redis']->del($this->lockName());
-
-        $this->hasLock = false;
-    }
+        ],
+    ];
 
     /**
      * Runs this cron job.
@@ -108,59 +54,102 @@ class CronJob extends Model
      */
     public function run($expires = 0, $successUrl = false)
     {
+        $lock = new Lock($this->module, $this->command);
+        $lock->setApp($this->getApp());
+
         // only run the job if we can get the lock
-        if (!$this->getLock($expires)) {
+        if (!$lock->getLock($expires)) {
             return self::LOCKED;
         }
 
-        $app = $this->getApp();
+        // once the lock is obtained we can attempt to run the job
+        list($result, $output) = $this->invokeJob();
+        $success = $result == self::SUCCESS;
 
-        // attempt to execute the job
-        $success = false;
-        $output = '';
+        // perform post-run tasks:
+        // persist the result
+        $this->saveRun($success, $output);
 
-        $class = 'App\\'.$this->module.'\Controller';
-
-        if (class_exists($class)) {
-            try {
-                ob_start();
-
-                $controller = new $class();
-
-                if (method_exists($controller, 'setApp')) {
-                    $controller->setApp($app);
-                }
-
-                $command = $this->command;
-                if (!method_exists($controller, $command)) {
-                    ob_end_clean();
-
-                    return self::METHOD_NON_EXISTENT;
-                } else {
-                    $success = $controller->$command();
-                }
-
-                $output = ob_get_clean();
-            } catch (Exception $e) {
-                $output = ob_get_clean();
-                $output .= "\n".$e->getMessage();
-            }
-        } else {
-            return self::CONTROLLER_NON_EXISTENT;
+        // ping success URL
+        if ($success) {
+            $this->notifySuccessUrl($successUrl, $output);
         }
 
+        // release the lock
+        $lock->releaseLock();
+
+        return $result;
+    }
+
+    /**
+     * Invokes the job.
+     *
+     * @return array array(result, output)
+     */
+    private function invokeJob()
+    {
+        $class = 'App\\'.$this->module.'\Controller';
+
+        if (!class_exists($class)) {
+            return [self::CONTROLLER_NON_EXISTENT, ''];
+        }
+
+        try {
+            ob_start();
+
+            $controller = new $class();
+
+            if (method_exists($controller, 'setApp')) {
+                $controller->setApp($this->getApp());
+            }
+
+            $command = $this->command;
+            if (!method_exists($controller, $command)) {
+                ob_end_clean();
+
+                return [self::METHOD_NON_EXISTENT, ''];
+            }
+
+            $success = $controller->$command();
+
+            $output = ob_get_clean();
+            $result = $success ? self::SUCCESS : self::FAILED;
+
+            return [$result, $output];
+        } catch (Exception $e) {
+            $output = ob_get_clean();
+            $output .= "\n".$e->getMessage();
+
+            return [self::FAILED, $output];
+        }
+    }
+
+    /**
+     * Saves the run attempt.
+     *
+     * @param bool   $success
+     * @param string $output
+     */
+    private function saveRun($success, $output)
+    {
         $this->last_ran = time();
         $this->last_run_result = $success;
         $this->last_run_output = $output;
         $this->save();
+    }
 
-        // ping the success URL
-        if ($success && $successUrl && $app['config']->get('app.production-level')) {
-            @file_get_contents($successUrl.'?m='.urlencode($output));
+    /**
+     * Pings the success URL about the successful run.
+     *
+     * @param string $url
+     * @param string $output
+     */
+    private function notifySuccessUrl($url, $output)
+    {
+        if (!$url) {
+            return;
         }
 
-        $this->releaseLock();
-
-        return ($success) ? self::SUCCESS : self::FAILED;
+        @file_get_contents($url.'?m='.urlencode($output));
     }
 }

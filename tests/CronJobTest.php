@@ -28,7 +28,13 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         include_once 'Controller.php';
 
-        Test::$app['db']->delete('CronJobs')->where('module', 'test')->execute();
+        Test::$app['db']->delete('CronJobs')
+                        ->where('module', 'test')
+                        ->execute();
+
+        Test::$app['db']->delete('CronJobs')
+                        ->where('module', 'non_existent')
+                        ->execute();
     }
 
     public static function tearDownAfterClass()
@@ -44,30 +50,9 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     public function testCreate()
     {
         self::$job = new CronJob();
-        $this->assertTrue(self::$job->create([
-            'module' => 'test',
-            'command' => 'test', ]));
-    }
-
-    public function testGetLock()
-    {
-        $job = new CronJob();
-        $this->assertTrue($job->getLock());
-
-        $app = new Application();
-        $app['config']->set('app.hostname', 'example.com');
-        $redis = Mockery::mock();
-        $redis->shouldReceive('setnx')->withArgs(['example.com:cron.module.command', 100])->andReturn(true)->once();
-        $redis->shouldReceive('del')->withArgs(['example.com:cron.module.command'])->andReturn(true)->once();
-        $redis->shouldReceive('expire')->withArgs(['example.com:cron.module.command', 100])->andReturn(true)->once();
-        $app['redis'] = $redis;
-        CronJob::inject($app);
-
-        $job = new CronJob();
-        $job->module = 'module';
-        $job->command = 'command';
-        $this->assertTrue($job->getLock(100));
-        $job->releaseLock();
+        self::$job->module = 'test';
+        self::$job->command = 'test';
+        $this->assertTrue(self::$job->save());
     }
 
     public function testRunLocked()
@@ -75,13 +60,16 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $app = new Application();
         $app['config']->set('app.hostname', 'example.com');
         $redis = Mockery::mock();
-        $redis->shouldReceive('setnx')->withArgs(['example.com:cron.module.command', 100])->andReturn(false)->once();
+        $redis->shouldReceive('setnx')
+              ->withArgs(['example.com:cron.test.locked', 100])
+              ->andReturn(false)
+              ->once();
         $app['redis'] = $redis;
         CronJob::inject($app);
 
         $job = new CronJob();
-        $job->module = 'module';
-        $job->command = 'command';
+        $job->module = 'test';
+        $job->command = 'locked';
         $this->assertEquals(CronJob::LOCKED, $job->run(100));
     }
 
@@ -89,10 +77,11 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         $job = new CronJob();
         $job->module = 'non_existent';
+        $job->command = 'non_existent';
         $this->assertEquals(CronJob::CONTROLLER_NON_EXISTENT, $job->run());
     }
 
-    public function testCommandNonExistent()
+    public function testRunCommandNonExistent()
     {
         $job = new CronJob();
         $job->module = 'test';
@@ -103,12 +92,13 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testCreate
      */
-    public function testRunExcpetion()
+    public function testRunException()
     {
-        self::$job->module = 'test';
-        self::$job->command = 'exception';
-        $this->assertEquals(CronJob::FAILED, self::$job->run());
-        $this->assertEquals("\ntest", self::$job->last_run_output);
+        $job = new CronJob();
+        $job->module = 'test';
+        $job->command = 'exception';
+        $this->assertEquals(CronJob::FAILED, $job->run());
+        $this->assertEquals("\ntest", $job->last_run_output);
     }
 
     /**
@@ -116,10 +106,11 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
      */
     public function testRunSuccess()
     {
-        self::$job->module = 'test';
-        self::$job->command = 'success';
-        $this->assertEquals(CronJob::SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
-        $this->assertEquals('test', self::$job->last_run_output);
+        $job = new CronJob();
+        $job->module = 'test';
+        $job->command = 'success';
+        $this->assertEquals(CronJob::SUCCESS, $job->run());
+        $this->assertEquals('test', $job->last_run_output);
     }
 
     /**
@@ -127,11 +118,13 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
      */
     public function testRunSuccessWithUrl()
     {
-        self::$job->module = 'test';
-        self::$job->command = 'success';
-        self::$functions->shouldReceive('file_get_contents')->with('http://webhook.example.com/?m=test')->once();
-        Test::$app['config']->set('app.production-level', true);
-        $this->assertEquals(CronJob::SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
-        $this->assertEquals('test', self::$job->last_run_output);
+        $job = new CronJob();
+        $job->module = 'test';
+        $job->command = 'success_with_url';
+        self::$functions->shouldReceive('file_get_contents')
+                        ->with('http://webhook.example.com/?m=yay')
+                        ->once();
+        $this->assertEquals(CronJob::SUCCESS, $job->run(0, 'http://webhook.example.com/'));
+        $this->assertEquals('yay', $job->last_run_output);
     }
 }

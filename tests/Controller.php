@@ -10,8 +10,12 @@
  */
 namespace App\Test;
 
+use Infuse\HasApp;
+
 class Controller
 {
+    use HasApp;
+
     public function exception()
     {
         throw new \Exception('test');
@@ -20,6 +24,13 @@ class Controller
     public function success()
     {
         echo 'test';
+
+        return true;
+    }
+
+    public function success_with_url()
+    {
+        echo 'yay';
 
         return true;
     }
