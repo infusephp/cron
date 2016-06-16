@@ -144,14 +144,14 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job = new CronJob();
         $job->module = 'module';
         $job->command = 'command';
-        $this->assertEquals(CRON_JOB_LOCKED, $job->run(100));
+        $this->assertEquals(CronJob::LOCKED, $job->run(100));
     }
 
     public function testRunControllerNonExistent()
     {
         $job = new CronJob();
         $job->module = 'non_existent';
-        $this->assertEquals(CRON_JOB_CONTROLLER_NON_EXISTENT, $job->run());
+        $this->assertEquals(CronJob::CONTROLLER_NON_EXISTENT, $job->run());
     }
 
     public function testCommandNonExistent()
@@ -159,7 +159,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job = new CronJob();
         $job->module = 'test';
         $job->command = 'non_existent';
-        $this->assertEquals(CRON_JOB_METHOD_NON_EXISTENT, $job->run());
+        $this->assertEquals(CronJob::METHOD_NON_EXISTENT, $job->run());
     }
 
     /**
@@ -169,7 +169,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         self::$job->module = 'test';
         self::$job->command = 'exception';
-        $this->assertEquals(CRON_JOB_FAILED, self::$job->run());
+        $this->assertEquals(CronJob::FAILED, self::$job->run());
         $this->assertEquals("\ntest", self::$job->last_run_output);
     }
 
@@ -180,7 +180,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
     {
         self::$job->module = 'test';
         self::$job->command = 'success';
-        $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
+        $this->assertEquals(CronJob::SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
         $this->assertEquals('test', self::$job->last_run_output);
     }
 
@@ -193,7 +193,7 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$job->command = 'success';
         self::$functions->shouldReceive('file_get_contents')->with('http://webhook.example.com/?m=test')->once();
         Test::$app['config']->set('app.production-level', true);
-        $this->assertEquals(CRON_JOB_SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
+        $this->assertEquals(CronJob::SUCCESS, self::$job->run(0, 'http://webhook.example.com/'));
         $this->assertEquals('test', self::$job->last_run_output);
     }
 }

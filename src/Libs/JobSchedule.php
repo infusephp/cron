@@ -64,7 +64,7 @@ class JobSchedule
             $job = $jobInfo['model'];
             list($result, $jobOutput) = $this->runJob($job, $jobInfo);
 
-            $success = $result == CRON_JOB_SUCCESS && $success;
+            $success = $result == CronJob::SUCCESS && $success;
             $output .= $jobOutput;
         }
 
@@ -86,18 +86,18 @@ class JobSchedule
         $result = $job->run($jobInfo['expires'], $jobInfo['successUrl']);
         $jobOutput = $job->last_run_output;
 
-        if ($result == CRON_JOB_LOCKED) {
+        if ($result == CronJob::LOCKED) {
             $output .= "{$job->module}.{$job->command} locked!\n";
-        } elseif ($result == CRON_JOB_CONTROLLER_NON_EXISTENT) {
+        } elseif ($result == CronJob::CONTROLLER_NON_EXISTENT) {
             $output .= "{$job->module} does not exist\n";
-        } elseif ($result == CRON_JOB_METHOD_NON_EXISTENT) {
+        } elseif ($result == CronJob::METHOD_NON_EXISTENT) {
             $output .= "{$job->module}\-\>{$job->command}() does not exist\n";
-        } elseif ($result == CRON_JOB_FAILED) {
+        } elseif ($result == CronJob::FAILED) {
             if ($jobOutput) {
                 $output .= "$jobOutput\n";
             }
             $output .= "-- Failed!\n";
-        } elseif ($result == CRON_JOB_SUCCESS) {
+        } elseif ($result == CronJob::SUCCESS) {
             if ($jobOutput) {
                 $output .= "$jobOutput\n";
             }

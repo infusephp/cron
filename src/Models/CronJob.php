@@ -14,14 +14,14 @@ use App\Cron\Libs\CronDate;
 use Infuse\Application;
 use Pulsar\Model;
 
-define('CRON_JOB_SUCCESS', 1);
-define('CRON_JOB_LOCKED', 2);
-define('CRON_JOB_CONTROLLER_NON_EXISTENT', 3);
-define('CRON_JOB_METHOD_NON_EXISTENT', 4);
-define('CRON_JOB_FAILED', 5);
-
 class CronJob extends Model
 {
+    const SUCCESS = 1;
+    const LOCKED = 2;
+    const CONTROLLER_NON_EXISTENT = 3;
+    const METHOD_NON_EXISTENT = 4;
+    const FAILED = 5;
+
     public static $scaffoldApi = true;
 
     protected static $ids = ['module', 'command'];
@@ -111,7 +111,7 @@ class CronJob extends Model
     {
         // only run the job if we can get the lock
         if (!$this->getLock($expires)) {
-            return CRON_JOB_LOCKED;
+            return self::LOCKED;
         }
 
         $app = $this->getApp();
@@ -136,7 +136,7 @@ class CronJob extends Model
                 if (!method_exists($controller, $command)) {
                     ob_end_clean();
 
-                    return CRON_JOB_METHOD_NON_EXISTENT;
+                    return self::METHOD_NON_EXISTENT;
                 } else {
                     $success = $controller->$command();
                 }
@@ -147,7 +147,7 @@ class CronJob extends Model
                 $output .= "\n".$e->getMessage();
             }
         } else {
-            return CRON_JOB_CONTROLLER_NON_EXISTENT;
+            return self::CONTROLLER_NON_EXISTENT;
         }
 
         $this->set([
@@ -162,7 +162,7 @@ class CronJob extends Model
 
         $this->releaseLock();
 
-        return ($success) ? CRON_JOB_SUCCESS : CRON_JOB_FAILED;
+        return ($success) ? self::SUCCESS : self::FAILED;
     }
 
     /**
