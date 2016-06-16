@@ -35,7 +35,6 @@ class CronJob extends Model
         ],
         'last_run_result' => [
             'type' => Model::TYPE_BOOLEAN,
-            'null' => true,
         ],
         'last_run_output' => [
             'null' => true,

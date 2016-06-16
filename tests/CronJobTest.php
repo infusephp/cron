@@ -70,7 +70,10 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job = new CronJob();
         $job->module = 'test';
         $job->command = 'locked';
+
         $this->assertEquals(CronJob::LOCKED, $job->run(100));
+
+        $this->assertFalse($job->exists());
     }
 
     public function testRunClassDoesNotExist()
@@ -78,7 +81,12 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job = new CronJob();
         $job->module = 'non_existent';
         $job->command = 'non_existent';
+
         $this->assertEquals(CronJob::FAILED, $job->run());
+
+        $this->assertTrue($job->exists());
+        $this->assertGreaterThan(0, $job->last_ran);
+        $this->assertFalse($job->last_run_result);
         $this->assertEquals('App\non_existent\Controller does not exist', $job->last_run_output);
     }
 
@@ -87,37 +95,43 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job = new CronJob();
         $job->module = 'test';
         $job->command = 'non_existent';
+
         $this->assertEquals(CronJob::FAILED, $job->run());
+
+        $this->assertTrue($job->exists());
+        $this->assertGreaterThan(0, $job->last_ran);
+        $this->assertFalse($job->last_run_result);
         $this->assertEquals('test->non_existent() does not exist', $job->last_run_output);
     }
 
-    /**
-     * @depends testCreate
-     */
     public function testRunException()
     {
         $job = new CronJob();
         $job->module = 'test';
         $job->command = 'exception';
+
         $this->assertEquals(CronJob::FAILED, $job->run());
+
+        $this->assertTrue($job->exists());
+        $this->assertGreaterThan(0, $job->last_ran);
+        $this->assertFalse($job->last_run_result);
         $this->assertEquals("\ntest", $job->last_run_output);
     }
 
-    /**
-     * @depends testCreate
-     */
     public function testRunSuccess()
     {
         $job = new CronJob();
         $job->module = 'test';
         $job->command = 'success';
+
         $this->assertEquals(CronJob::SUCCESS, $job->run());
+
+        $this->assertTrue($job->exists());
+        $this->assertGreaterThan(0, $job->last_ran);
+        $this->assertTrue($job->last_run_result);
         $this->assertEquals('test', $job->last_run_output);
     }
 
-    /**
-     * @depends testCreate
-     */
     public function testRunSuccessWithUrl()
     {
         $job = new CronJob();
@@ -126,7 +140,12 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$functions->shouldReceive('file_get_contents')
                         ->with('http://webhook.example.com/?m=yay')
                         ->once();
+
         $this->assertEquals(CronJob::SUCCESS, $job->run(0, 'http://webhook.example.com/'));
+
+        $this->assertTrue($job->exists());
+        $this->assertGreaterThan(0, $job->last_ran);
+        $this->assertTrue($job->last_run_result);
         $this->assertEquals('yay', $job->last_run_output);
     }
 }
