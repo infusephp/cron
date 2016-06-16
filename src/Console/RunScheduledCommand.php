@@ -10,7 +10,7 @@
  */
 namespace App\Cron\Console;
 
-use App\Cron\Libs\Cron;
+use App\Cron\Libs\JobSchedule;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,15 +21,17 @@ class RunScheduledCommand extends Command
     {
         $this
             ->setName('run-scheduled')
-            ->setDescription('Runs any scheduled cron jobs');
+            ->setDescription('Runs any scheduled jobs');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $cronOutput = '';
-        $result = Cron::scheduleCheck($cronOutput);
+        $schedule = new JobSchedule($this->app['config']->get('cron'));
 
-        foreach (explode("\n", $cronOutput) as $line) {
+        $scheduleOutput = '';
+        $result = $schedule->run($scheduleOutput);
+
+        foreach (explode("\n", $scheduleOutput) as $line) {
             $output->writeln($line);
         }
 

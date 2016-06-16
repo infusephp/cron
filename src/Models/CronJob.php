@@ -10,7 +10,6 @@
  */
 namespace App\Cron\Models;
 
-use App\Cron\Libs\Cron;
 use App\Cron\Libs\CronDate;
 use Infuse\Application;
 use Pulsar\Model;
