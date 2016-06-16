@@ -11,6 +11,7 @@
 namespace App\Cron\Models;
 
 use App\Cron\Libs\CronDate;
+use App\Cron\Libs\DateParameters;
 use Infuse\Application;
 use Pulsar\Model;
 
@@ -181,21 +182,16 @@ class CronJob extends Model
         $start = floor(time() / 60) * 60;
 
         foreach ($jobsFromConfig as $job) {
-            $job = array_replace([
-                'minute' => '*',
-                'hour' => '*',
-                'day' => '*',
-                'week' => '*',
-                'month' => '*',
-                'successUrl' => '',
-                'expires' => 0, ], $job);
-
-            // check if overdue
-            $nextRun = self::calcNextRun($job);
-
-            if ($nextRun > $start) {
+            // check if scheduled to run
+            $params = new DateParameters($job);
+            $date = new CronDate($params);
+            if ($date->getNextRun() > $start) {
                 continue;
             }
+
+            $job = array_replace([
+                'successUrl' => '',
+                'expires' => 0, ], $job);
 
             // check if model has already been created for the job
             $model = new self([$job[ 'module'], $job['command']]);
@@ -212,88 +208,5 @@ class CronJob extends Model
         }
 
         return $jobs;
-    }
-
-    /**
-     * Generates a timestamp from cron date parameters.
-     *
-     * @param array $params cron date parameters (minute, hour, day, month, week)
-     *
-     * @return int timestamp
-     */
-    public static function calcNextRun(array $params)
-    {
-        $cron_date = new CronDate(time());
-        $cron_date->second = 0;
-
-        if ($params[ 'minute' ] == '*') {
-            $params[ 'minute' ] = null;
-        }
-        if ($params[ 'hour' ] == '*') {
-            $params[ 'hour' ] = null;
-        }
-        if ($params[ 'day' ] == '*') {
-            $params[ 'day' ] = null;
-        }
-        if ($params[ 'month' ] == '*') {
-            $params[ 'month' ] = null;
-        }
-        if ($params[ 'week' ] == '*') {
-            $params[ 'week' ] = null;
-        }
-
-        $Job = [
-            'Minute' => $params[ 'minute' ],
-            'Hour' => $params[ 'hour' ],
-            'Day' => $params[ 'day' ],
-            'Month' => $params[ 'month' ],
-            'DOW' => $params[ 'week' ], ];
-
-        $done = 0;
-        while ($done < 100) {
-            if (!is_null($Job['Minute']) && ($cron_date->minute != $Job['Minute'])) {
-                if ($cron_date->minute > $Job['Minute']) {
-                    $cron_date->modify('+1 hour');
-                }
-                $cron_date->minute = $Job['Minute'];
-            }
-            if (!is_null($Job['Hour']) && ($cron_date->hour != $Job['Hour'])) {
-                if ($cron_date->hour > $Job['Hour']) {
-                    $cron_date->modify('+1 day');
-                }
-                $cron_date->hour = $Job['Hour'];
-                $cron_date->minute = 0;
-            }
-            if (!is_null($Job['DOW']) && ($cron_date->dow != $Job['DOW'])) {
-                $cron_date->dow = $Job['DOW'];
-                $cron_date->hour = 0;
-                $cron_date->minute = 0;
-            }
-            if (!is_null($Job['Day']) && ($cron_date->day != $Job['Day'])) {
-                if ($cron_date->day > $Job['Day']) {
-                    $cron_date->modify('+1 month');
-                }
-                $cron_date->day = $Job['Day'];
-                $cron_date->hour = 0;
-                $cron_date->minute = 0;
-            }
-            if (!is_null($Job['Month']) && ($cron_date->month != $Job['Month'])) {
-                if ($cron_date->month > $Job['Month']) {
-                    $cron_date->modify('+1 year');
-                }
-                $cron_date->month = $Job['Month'];
-                $cron_date->day = 1;
-                $cron_date->hour = 0;
-                $cron_date->minute = 0;
-            }
-
-            $done = (is_null($Job['Minute']) || $Job['Minute'] == $cron_date->minute) &&
-                    (is_null($Job['Hour']) || $Job['Hour'] == $cron_date->hour) &&
-                    (is_null($Job['Day']) || $Job['Day'] == $cron_date->day) &&
-                    (is_null($Job['Month']) || $Job['Month'] == $cron_date->month) &&
-                    (is_null($Job['DOW']) || $Job['DOW'] == $cron_date->dow) ? 100 : ($done + 1);
-        }
-
-        return $cron_date->timestamp;
     }
 }

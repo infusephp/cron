@@ -41,38 +41,6 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         self::$functions = Mockery::mock();
     }
 
-    public function testCalcNextRun()
-    {
-        $input = [
-            'minute' => '*',
-            'hour' => '*',
-            'day' => '*',
-            'month' => '*',
-            'week' => '*',
-        ];
-
-        // should be the next minute
-        $expected = floor(time() / 60) * 60;
-        $this->assertEquals($expected, CronJob::calcNextRun($input));
-
-        $input = [
-            'minute' => 0,
-            'hour' => 0,
-            'day' => 1,
-            'month' => 0,
-            'week' => 0,
-        ];
-
-        // should be the next Monday that is the first day of the month at 12:00
-        // TODO this fails when ran on a Monday
-        $expected = mktime(0, 0, 0, date('n'), 1, date('Y'));
-        while (date('D', $expected) != 'Mon') {
-            $expected = strtotime('+1 month', $expected);
-        }
-
-        $this->assertEquals($expected, CronJob::calcNextRun($input));
-    }
-
     public function testCreate()
     {
         self::$job = new CronJob();
@@ -101,11 +69,6 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('test', $job1['module']);
         $this->assertEquals('test2', $job2['command']);
-        $this->assertEquals('*', $job2['minute']);
-        $this->assertEquals('*', $job2['hour']);
-        $this->assertEquals('*', $job2['week']);
-        $this->assertEquals('*', $job2['day']);
-        $this->assertEquals('*', $job2['month']);
         $this->assertEquals(0, $job2['expires']);
         $this->assertEquals('', $job2['successUrl']);
         $this->assertTrue($job2['model']->exists());
