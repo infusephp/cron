@@ -73,20 +73,22 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(CronJob::LOCKED, $job->run(100));
     }
 
-    public function testRunControllerNonExistent()
+    public function testRunClassDoesNotExist()
     {
         $job = new CronJob();
         $job->module = 'non_existent';
         $job->command = 'non_existent';
-        $this->assertEquals(CronJob::CONTROLLER_NON_EXISTENT, $job->run());
+        $this->assertEquals(CronJob::FAILED, $job->run());
+        $this->assertEquals('App\non_existent\Controller does not exist', $job->last_run_output);
     }
 
-    public function testRunCommandNonExistent()
+    public function testRunCommandDoesNotExist()
     {
         $job = new CronJob();
         $job->module = 'test';
         $job->command = 'non_existent';
-        $this->assertEquals(CronJob::METHOD_NON_EXISTENT, $job->run());
+        $this->assertEquals(CronJob::FAILED, $job->run());
+        $this->assertEquals('test->non_existent() does not exist', $job->last_run_output);
     }
 
     /**

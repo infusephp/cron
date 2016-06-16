@@ -18,9 +18,7 @@ class CronJob extends Model
 {
     const SUCCESS = 1;
     const LOCKED = 2;
-    const CONTROLLER_NON_EXISTENT = 3;
-    const METHOD_NON_EXISTENT = 4;
-    const FAILED = 5;
+    const FAILED = 3;
 
     protected static $ids = ['module', 'command'];
 
@@ -91,7 +89,7 @@ class CronJob extends Model
         $class = 'App\\'.$this->module.'\Controller';
 
         if (!class_exists($class)) {
-            return [self::CONTROLLER_NON_EXISTENT, ''];
+            return [self::FAILED, "$class does not exist"];
         }
 
         try {
@@ -107,7 +105,7 @@ class CronJob extends Model
             if (!method_exists($controller, $command)) {
                 ob_end_clean();
 
-                return [self::METHOD_NON_EXISTENT, ''];
+                return [self::FAILED, "{$this->module}->{$this->command}() does not exist"];
             }
 
             $success = $controller->$command();

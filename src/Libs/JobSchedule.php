@@ -94,7 +94,7 @@ class JobSchedule
             $job = $jobInfo['model'];
             $result = $this->runJob($job, $jobInfo, $output);
 
-            $success = $result == CronJob::SUCCESS && $success;
+            $success = $result && $success;
         }
 
         return $success;
@@ -107,33 +107,24 @@ class JobSchedule
      * @param array           $jobInfo
      * @param OutputInterface $output
      *
-     * @return int result
+     * @return bool succeeded?
      */
     private function runJob(CronJob $job, array $jobInfo, OutputInterface $output)
     {
         $output->writeln("-- Starting {$job->module}.{$job->command}:");
 
         $result = $job->run($jobInfo['expires'], $jobInfo['successUrl']);
-        $jobOutput = $job->last_run_output;
 
-        if ($result == CronJob::LOCKED) {
-            $output->writeln("{$job->module}.{$job->command} locked!");
-        } elseif ($result == CronJob::CONTROLLER_NON_EXISTENT) {
-            $output->writeln("{$job->module} does not exist");
-        } elseif ($result == CronJob::METHOD_NON_EXISTENT) {
-            $output->writeln("{$job->module}\-\>{$job->command}() does not exist");
-        } elseif ($result == CronJob::FAILED) {
-            if ($jobOutput) {
-                $output->writeln($jobOutput);
-            }
-            $output->writeln('-- Failed!');
-        } elseif ($result == CronJob::SUCCESS) {
-            if ($jobOutput) {
-                $output->writeln($jobOutput);
-            }
+        if ($result == CronJob::SUCCESS) {
+            $output->writeln($job->last_run_output);
             $output->writeln('-- Success!');
+        } elseif ($result == CronJob::LOCKED) {
+            $output->writeln("{$job->module}.{$job->command} locked!");
+        } elseif ($result == CronJob::FAILED) {
+            $output->writeln($job->last_run_output);
+            $output->writeln('-- Failed!');
         }
 
-        return $result;
+        return $result == CronJob::SUCCESS;
     }
 }
