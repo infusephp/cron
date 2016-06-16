@@ -10,6 +10,7 @@
  */
 namespace App\Cron\Models;
 
+use Exception;
 use Pulsar\Model;
 
 class CronJob extends Model
@@ -118,7 +119,7 @@ class CronJob extends Model
         $success = false;
         $output = '';
 
-        $class = 'App\\'.$this->module.'\\Controller';
+        $class = 'App\\'.$this->module.'\Controller';
 
         if (class_exists($class)) {
             try {
@@ -140,7 +141,7 @@ class CronJob extends Model
                 }
 
                 $output = ob_get_clean();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $output = ob_get_clean();
                 $output .= "\n".$e->getMessage();
             }
@@ -148,10 +149,10 @@ class CronJob extends Model
             return self::CONTROLLER_NON_EXISTENT;
         }
 
-        $this->set([
-            'last_ran' => time(),
-            'last_run_result' => $success,
-            'last_run_output' => $output, ]);
+        $this->last_ran = time();
+        $this->last_run_result = $success;
+        $this->last_run_output = $output;
+        $this->save();
 
         // ping the success URL
         if ($success && $successUrl && $app['config']->get('app.production-level')) {
