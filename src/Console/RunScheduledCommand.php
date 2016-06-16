@@ -32,13 +32,6 @@ class RunScheduledCommand extends Command
         $jobs = (array) $this->app['config']->get('cron');
         $schedule = new JobSchedule($jobs);
 
-        $scheduleOutput = '';
-        $result = $schedule->run($scheduleOutput);
-
-        foreach (explode("\n", $scheduleOutput) as $line) {
-            $output->writeln($line);
-        }
-
-        return $result;
+        return $schedule->run($output) ? 0 : 1;
     }
 }

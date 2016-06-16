@@ -11,6 +11,7 @@
 namespace App\Cron\Libs;
 
 use App\Cron\Models\CronJob;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class JobSchedule
 {
@@ -79,22 +80,21 @@ class JobSchedule
     /**
      * Runs any scheduled tasks.
      *
-     * @param string $output append output to this variable
+     * @param OutputInterface $output
      *
      * @return bool true if all tasks ran successfully
      */
-    public function run(&$output = '')
+    public function run(OutputInterface $output)
     {
-        $output .= "-- Starting Cron\n";
+        $output->writeln('-- Starting Cron');
 
         $success = true;
 
         foreach ($this->getScheduledJobs() as $jobInfo) {
             $job = $jobInfo['model'];
-            list($result, $jobOutput) = $this->runJob($job, $jobInfo);
+            $result = $this->runJob($job, $jobInfo, $output);
 
             $success = $result == CronJob::SUCCESS && $success;
-            $output .= $jobOutput;
         }
 
         return $success;
@@ -103,36 +103,37 @@ class JobSchedule
     /**
      * Runs a scheduled job.
      *
-     * @param CronJob $job
-     * @param array   $jobInfo
+     * @param CronJob         $job
+     * @param array           $jobInfo
+     * @param OutputInterface $output
      *
-     * @return array array(result, output)
+     * @return int result
      */
-    private function runJob(CronJob $job, array $jobInfo)
+    private function runJob(CronJob $job, array $jobInfo, OutputInterface $output)
     {
-        $output = "-- Starting {$job->module}.{$job->command}:\n";
+        $output->writeln("-- Starting {$job->module}.{$job->command}:");
 
         $result = $job->run($jobInfo['expires'], $jobInfo['successUrl']);
         $jobOutput = $job->last_run_output;
 
         if ($result == CronJob::LOCKED) {
-            $output .= "{$job->module}.{$job->command} locked!\n";
+            $output->writeln("{$job->module}.{$job->command} locked!");
         } elseif ($result == CronJob::CONTROLLER_NON_EXISTENT) {
-            $output .= "{$job->module} does not exist\n";
+            $output->writeln("{$job->module} does not exist");
         } elseif ($result == CronJob::METHOD_NON_EXISTENT) {
-            $output .= "{$job->module}\-\>{$job->command}() does not exist\n";
+            $output->writeln("{$job->module}\-\>{$job->command}() does not exist");
         } elseif ($result == CronJob::FAILED) {
             if ($jobOutput) {
-                $output .= "$jobOutput\n";
+                $output->writeln($jobOutput);
             }
-            $output .= "-- Failed!\n";
+            $output->writeln('-- Failed!');
         } elseif ($result == CronJob::SUCCESS) {
             if ($jobOutput) {
-                $output .= "$jobOutput\n";
+                $output->writeln($jobOutput);
             }
-            $output .= "-- Success!\n";
+            $output->writeln('-- Success!');
         }
 
-        return [$result, $output];
+        return $result;
     }
 }
