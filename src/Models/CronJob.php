@@ -10,9 +10,6 @@
  */
 namespace App\Cron\Models;
 
-use App\Cron\Libs\CronDate;
-use App\Cron\Libs\DateParameters;
-use Infuse\Application;
 use Pulsar\Model;
 
 class CronJob extends Model
@@ -30,28 +27,28 @@ class CronJob extends Model
     protected static $properties = [
         'module' => [
             'required' => true,
-        ],
+       ],
         'command' => [
             'required' => true,
-        ],
+       ],
         'last_ran' => [
             'type' => Model::TYPE_NUMBER,
             'null' => true,
             'admin_type' => 'datepicker',
-        ],
+       ],
         'last_run_result' => [
             'type' => Model::TYPE_BOOLEAN,
             'null' => true,
             'admin_type' => 'checkbox',
-        ],
+       ],
         'last_run_output' => [
             'null' => true,
             'admin_type' => 'textarea',
             'admin_hidden_property' => true,
             'admin_html' => '<pre>{last_run_output}</pre>',
             'admin_truncate' => false,
-        ],
-    ];
+       ],
+   ];
 
     private $hasLock;
 
@@ -164,49 +161,5 @@ class CronJob extends Model
         $this->releaseLock();
 
         return ($success) ? self::SUCCESS : self::FAILED;
-    }
-
-    /**
-     * Gets all jobs that are due to be ran and current lock values.
-     *
-     * @return array(model => CronJob, lock => lock value)
-     */
-    public static function overdueJobs()
-    {
-        $app = Application::getDefault();
-        $jobsFromConfig = (array) $app['config']->get('cron');
-
-        $jobs = [];
-
-        // round current time down to nearest minute
-        $start = floor(time() / 60) * 60;
-
-        foreach ($jobsFromConfig as $job) {
-            // check if scheduled to run
-            $params = new DateParameters($job);
-            $date = new CronDate($params);
-            if ($date->getNextRun() > $start) {
-                continue;
-            }
-
-            $job = array_replace([
-                'successUrl' => '',
-                'expires' => 0, ], $job);
-
-            // check if model has already been created for the job
-            $model = new self([$job[ 'module'], $job['command']]);
-
-            if (!$model->exists()) {
-                $model = new self();
-                $model->create([
-                    'module' => $job['module'],
-                    'command' => $job['command'], ]);
-            }
-
-            $job['model'] = $model;
-            $jobs[] = $job;
-        }
-
-        return $jobs;
     }
 }

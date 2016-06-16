@@ -20,7 +20,7 @@ class JobSchedule
     private $jobs;
 
     /**
-     * @var array
+     * @var array list of available jobs
      */
     public function __construct(array $jobs)
     {
@@ -38,13 +38,43 @@ class JobSchedule
     }
 
     /**
-     * Gets all of the jobs scheduled to run now.
+     * Gets all of the jobs scheduled to run, now.
      *
-     * @return array
+     * @return array(model => CronJob)
      */
     public function getScheduledJobs()
     {
-        return CronJob::overdueJobs();
+        // round current time down to nearest minute
+        $start = floor(time() / 60) * 60;
+
+        $jobs = [];
+        foreach ($this->jobs as $job) {
+            // check if scheduled to run
+            $params = new DateParameters($job);
+            $date = new CronDate($params);
+            if ($date->getNextRun() > $start) {
+                continue;
+            }
+
+            $job = array_replace([
+                'successUrl' => '',
+                'expires' => 0, ], $job);
+
+            // check if model has already been created for the job
+            $model = new CronJob([$job['module'], $job['command']]);
+
+            if (!$model->exists()) {
+                $model = new CronJob();
+                $model->module = $job['module'];
+                $model->command = $job['command'];
+                $model->save();
+            }
+
+            $job['model'] = $model;
+            $jobs[] = $job;
+        }
+
+        return $jobs;
     }
 
     /**

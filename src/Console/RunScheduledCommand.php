@@ -29,7 +29,8 @@ class RunScheduledCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $schedule = new JobSchedule($this->app['config']->get('cron'));
+        $jobs = (array) $this->app['config']->get('cron');
+        $schedule = new JobSchedule($jobs);
 
         $scheduleOutput = '';
         $result = $schedule->run($scheduleOutput);

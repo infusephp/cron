@@ -49,31 +49,6 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
             'command' => 'test', ]));
     }
 
-    /**
-     * @depends testCreate
-     */
-    public function testOverdueJobs()
-    {
-        $overdue = CronJob::overdueJobs();
-
-        $this->assertCount(2, $overdue);
-        $job1 = $overdue[0];
-        $job2 = $overdue[1];
-
-        $this->assertEquals('test', $job1['module']);
-        $this->assertEquals('test', $job1['command']);
-        $this->assertEquals(0, $job1['minute']);
-        $this->assertEquals(0, $job1['hour']);
-        $this->assertEquals(60, $job1['expires']);
-        $this->assertEquals('http://webhook.example.com', $job1['successUrl']);
-
-        $this->assertEquals('test', $job1['module']);
-        $this->assertEquals('test2', $job2['command']);
-        $this->assertEquals(0, $job2['expires']);
-        $this->assertEquals('', $job2['successUrl']);
-        $this->assertTrue($job2['model']->exists());
-    }
-
     public function testGetLock()
     {
         $job = new CronJob();
