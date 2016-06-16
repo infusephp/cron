@@ -9,15 +9,14 @@
  * @license MIT
  */
 use App\Cron\Libs\JobSchedule;
+use Infuse\Test;
 
 class JobScheduleTest extends PHPUnit_Framework_TestCase
 {
     public static $jobs = [
         [
           'module' => 'test',
-          'command' => 'test',
-          'expires' => 60,
-          'successUrl' => 'http://webhook.example.com',
+          'command' => 'success_with_url',
           'minute' => 0,
           'hour' => 0,
           'day' => '*',
@@ -26,9 +25,18 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
         ],
         [
           'module' => 'test',
-          'command' => 'test2',
+          'command' => 'success',
         ],
     ];
+
+    public static function setUpBeforeClass()
+    {
+        include_once 'Controller.php';
+
+        Test::$app['db']->delete('CronJobs')
+                        ->where('module', 'test')
+                        ->execute();
+    }
 
     public function testGetAllJobs()
     {
@@ -39,33 +47,26 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
     public function testGetScheduledJobs()
     {
         $schedule = new JobSchedule(self::$jobs);
-        $overdue = $schedule->getScheduledJobs();
+        $jobs = $schedule->getScheduledJobs();
 
-        $this->assertCount(2, $overdue);
-        $job1 = $overdue[0];
-        $job2 = $overdue[1];
+        $this->assertCount(2, $jobs);
 
-        $this->assertEquals('test', $job1['module']);
-        $this->assertEquals('test', $job1['command']);
-        $this->assertEquals(0, $job1['minute']);
-        $this->assertEquals(0, $job1['hour']);
-        $this->assertEquals(60, $job1['expires']);
-        $this->assertEquals('http://webhook.example.com', $job1['successUrl']);
-        $this->assertInstanceOf('App\Cron\Models\CronJob', $job1['model']);
-        $this->assertEquals('test', $job1['model']->module);
-        $this->assertEquals('test', $job1['model']->command);
+        $this->assertInstanceOf('App\Cron\Models\CronJob', $jobs[0]['model']);
+        $this->assertEquals('test', $jobs[0]['model']->module);
+        $this->assertEquals('success_with_url', $jobs[0]['model']->command);
 
-        $this->assertEquals('test', $job2['module']);
-        $this->assertEquals('test2', $job2['command']);
-        $this->assertEquals(0, $job2['expires']);
-        $this->assertEquals('', $job2['successUrl']);
-        $this->assertInstanceOf('App\Cron\Models\CronJob', $job2['model']);
-        $this->assertEquals('test', $job2['model']->module);
-        $this->assertEquals('test2', $job2['model']->command);
+        $this->assertInstanceOf('App\Cron\Models\CronJob', $jobs[1]['model']);
+        $this->assertEquals('test', $jobs[1]['model']->module);
+        $this->assertEquals('success', $jobs[1]['model']->command);
     }
 
     public function testRun()
     {
-        $this->markTestIncomplete();
+        $output = Mockery::mock('Symfony\Component\Console\Output\OutputInterface');
+        $output->shouldReceive('writeln');
+
+        $schedule = new JobSchedule(self::$jobs);
+
+        $this->assertTrue($schedule->run($output));
     }
 }
