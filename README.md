@@ -13,45 +13,48 @@ Scheduled jobs module for Infuse Framework
 
 1. Install the package with [composer](http://getcomposer.org):
 
-```
-composer require infuse/cron
-```
+   ```
+   composer require infuse/cron
+   ```
 
 2. Add scheduled jobs to the `cron` section of your app's configuration:
-```php
-'cron' => [
-	[
-		'id' => 'users:cleanup',
-		'class' => 'App\Users\ScheduledJobs\Cleanup',
-		'minute' => 0,
-		'hour' => 0,
-		'expires' => 60,
-		'successUrl' => 'https://webhook.example.com'
-	],
-	[
-		'id' => 'orgs:bill',
-		'class' => 'App\Billing\ScheduledJobs\Bill'
-	]
-]
-```
 
-And add the console command to run jobs to `console.commands` in your app's configuration:
-```php
-'console' => [
-	// ...
-	'commands' => [
-		// ...
-		'App\Cron\Console\RunScheduledCommand'
-	]
-]
-```
+   ```php
+   'cron' => [
+      	[
+	       'id' => 'users:cleanup',
+		   'class' => 'App\Users\ScheduledJobs\Cleanup',
+		   'minute' => 0,
+		   'hour' => 0,
+		   'expires' => 60,
+		   'successUrl' => 'https://webhook.example.com'
+	   ],
+	   [
+   		   'id' => 'orgs:bill',
+		   'class' => 'App\Billing\ScheduledJobs\Bill'
+	   ]
+   ]
+   ```
+
+   And add the console command to run jobs to `console.commands` in your app's configuration:
+   
+   ```php
+   'console' => [
+	   // ...
+	   'commands' => [
+		   // ...
+		   'App\Cron\Console\RunScheduledCommand'
+	   ]
+   ]
+   ```
 
 3. Code up your jobs. Each job class must be [invokeable](http://php.net/manual/en/language.oop5.magic.php#object.invoke).
 
 4. Add this to your crontab to begin running app cron jobs in the background:
-```bash
-*	*	*	*	*	php /var/www/example.com/infuse run-scheduled
-```
+
+   ```bash
+   *	*	*	*	*	php /var/www/example.com/infuse run-scheduled
+   ```
 
 ### Webhooks
 
