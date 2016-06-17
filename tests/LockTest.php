@@ -13,16 +13,16 @@ use Infuse\Application;
 
 class LockTest extends \PHPUnit_Framework_TestCase
 {
-    public function testGetLockNoExpiry()
+    public function testAcquireNoExpiry()
     {
         $lock = new Lock('module', 'command');
 
         $this->assertFalse($lock->hasLock());
-        $this->assertTrue($lock->getLock(0));
+        $this->assertTrue($lock->acquire(0));
         $this->assertFalse($lock->hasLock());
     }
 
-    public function testGetLock()
+    public function testAcquire()
     {
         $app = new Application();
         $app['config']->set('app.hostname', 'example.com');
@@ -34,10 +34,10 @@ class LockTest extends \PHPUnit_Framework_TestCase
 
         $lock = new Lock('module', 'command');
         $lock->setApp($app);
-        $this->assertTrue($lock->getLock(100));
+        $this->assertTrue($lock->acquire(100));
         $this->assertTrue($lock->hasLock());
 
-        $lock->releaseLock();
+        $lock->release();
         $this->assertFalse($lock->hasLock());
     }
 }

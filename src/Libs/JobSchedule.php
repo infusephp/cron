@@ -110,8 +110,9 @@ class JobSchedule
     {
         $output->writeln("-- Starting {$job->module}.{$job->command}:");
 
+        $runner = new Runner($job);
         $run = new Run($output);
-        $job->run($jobInfo['expires'], $jobInfo['successUrl'], $run);
+        $runner->go($jobInfo['expires'], $jobInfo['successUrl'], $run);
 
         if ($run->succeeded()) {
             $output->writeln('-- Success!');

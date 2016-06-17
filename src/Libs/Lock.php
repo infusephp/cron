@@ -58,13 +58,13 @@ class Lock
     }
 
     /**
-     * Attempts to get the global lock for this job.
+     * Attempts to acquire the global lock for this job.
      *
      * @param int $expires time in seconds after which the lock expires
      *
      * @return bool
      */
-    public function getLock($expires)
+    public function acquire($expires)
     {
         // do not lock if expiry time is 0
         if ($expires <= 0) {
@@ -90,7 +90,7 @@ class Lock
      *
      * @return self
      */
-    public function releaseLock()
+    public function release()
     {
         if (!$this->hasLock) {
             return $this;
