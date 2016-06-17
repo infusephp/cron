@@ -122,7 +122,7 @@ class JobSchedule
      */
     private function runJob(CronJob $job, array $jobInfo, OutputInterface $output)
     {
-        $output->writeln("-- Starting {$job->id}:");
+        $output->writeln("-- Starting {$job->id}...");
 
         // set up the runner
         $class = array_value($jobInfo, 'class');
