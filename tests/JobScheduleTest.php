@@ -57,15 +57,15 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('success', $jobs[1]['model']->command);
     }
 
-    public function testRun()
+    public function testRunScheduled()
     {
         $output = Mockery::mock('Symfony\Component\Console\Output\OutputInterface');
         $output->shouldReceive('writeln')
-               ->times(4);
+               ->times(7);
 
         $schedule = new JobSchedule(self::$jobs);
 
-        $this->assertTrue($schedule->run($output));
+        $this->assertTrue($schedule->runScheduled($output));
 
         // running the schedule should remove the
         // `success_with_url` job from the schedule

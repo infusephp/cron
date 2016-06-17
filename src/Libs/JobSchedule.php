@@ -83,7 +83,7 @@ class JobSchedule
      *
      * @return bool true if all tasks ran successfully
      */
-    public function run(OutputInterface $output)
+    public function runScheduled(OutputInterface $output)
     {
         $success = true;
 
@@ -111,7 +111,8 @@ class JobSchedule
         $output->writeln("-- Starting {$job->module}.{$job->command}:");
 
         $runner = new Runner($job);
-        $run = new Run($output);
+        $run = new Run();
+        $run->setConsoleOutput($output);
         $runner->go($jobInfo['expires'], $jobInfo['successUrl'], $run);
 
         if ($run->succeeded()) {
