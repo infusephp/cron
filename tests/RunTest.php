@@ -16,6 +16,8 @@ class RunTest extends PHPUnit_Framework_TestCase
     {
         $run = new Run();
         $this->assertEquals('', $run->getOutput());
+        $run->writeOutput('');
+        $run->writeOutput('');
         $run->writeOutput('1');
         $run->writeOutput('2');
         $run->writeOutput('3');
@@ -30,6 +32,8 @@ class RunTest extends PHPUnit_Framework_TestCase
 
         $run = new Run();
         $run->setConsoleOutput($console);
+        $run->writeOutput('');
+        $run->writeOutput('');
         $run->writeOutput('1');
         $run->writeOutput('2');
         $run->writeOutput('3');

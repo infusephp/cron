@@ -42,6 +42,10 @@ class Run
      */
     public function writeOutput($str)
     {
+        if (empty($str)) {
+            return $this;
+        }
+
         $this->output[] = $str;
 
         if ($this->consoleOutput) {
