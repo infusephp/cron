@@ -58,7 +58,7 @@ class Run
      */
     public function getOutput()
     {
-        return implode("\n", $this->output);
+        return trim(implode("\n", $this->output));
     }
 
     /**

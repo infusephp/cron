@@ -10,7 +10,7 @@ class Runner
     /**
      * @var CronJob
      */
-    private $job;
+    private $jobModel;
 
     /**
      * @var Lock
@@ -18,26 +18,79 @@ class Runner
     private $lock;
 
     /**
-     * @var CronJob
+     * @var string
      */
-    public function __construct(CronJob $job)
+    private $class;
+
+    /**
+     * DEPRECATED this is kept for BC.
+     *
+     * @var string|null
+     */
+    private $module;
+
+    /**
+     * DEPRECATED this is kept for BC.
+     *
+     * @var string|null
+     */
+    private $command;
+
+    /**
+     * @var CronJob
+     * @var string  $class callable job class
+     */
+    public function __construct(CronJob $job, $class)
     {
-        $this->job = $job;
+        $this->jobModel = $job;
+        $this->class = $class;
 
         // build the job lock
-        $lock = new Lock($this->job->module, $this->job->command);
-        $lock->setApp($this->job->getApp());
+        $lock = new Lock($this->jobModel->id);
+        $lock->setApp($this->jobModel->getApp());
         $this->lock = $lock;
+
+        // DEPRECATED this is kept for BC
+        if (!$class && $job->module) {
+            $this->withModuleDeprecated($job->module, $job->command);
+        }
     }
 
     /**
-     * Gets the job associated with this runner.
+     * Sets the callable class from a module and command argument.
+     *
+     * @var string|null deprecated module argument
+     * @var string|null $command deprecated command argument
+     *
+     * @return self
+     */
+    public function withModuleDeprecated($module, $command)
+    {
+        $this->class = 'App\\'.$module.'\Controller';
+        $this->module = $module;
+        $this->command = $command;
+
+        return $this;
+    }
+
+    /**
+     * Gets the job model for this runner.
      *
      * @return CronJob
      */
-    public function getJob()
+    public function getJobModel()
     {
-        return $this->job;
+        return $this->jobModel;
+    }
+
+    /**
+     * Gets the job class for this runner.
+     *
+     * @return string
+     */
+    public function getJobClass()
+    {
+        return $this->class;
     }
 
     /**
@@ -60,8 +113,18 @@ class Runner
             return $run->setResult(Run::RESULT_LOCKED);
         }
 
-        // once the lock is obtained we can attempt to run the job
-        $this->invokeJob($run);
+        // set up the callable
+        $job = $this->setUp($this->class, $run);
+
+        // DEPRECATED this is kept for BC
+        if ($job && $this->command) {
+            $job = $this->setUpControllerDeprecated($job, $this->command, $run);
+        }
+
+        // this is where the job actually gets called
+        if ($job) {
+            $this->invoke($job, $run);
+        }
 
         // perform post-run tasks:
         // persist the result
@@ -79,40 +142,68 @@ class Runner
     }
 
     /**
-     * Invokes the actual job.
+     * Sets up an invokable class for a scheduled job run.
+     *
+     * @param string $class
+     * @param Run    $run
+     *
+     * @return callable|false
+     */
+    private function setUp($class, Run $run)
+    {
+        if (!class_exists($class)) {
+            $run->writeOutput("$class does not exist")
+                ->setResult(Run::RESULT_FAILED);
+
+            return false;
+        }
+
+        $job = new $class();
+
+        // inject the DI container if needed
+        if (method_exists($job, 'setApp')) {
+            $job->setApp($this->jobModel->getApp());
+        }
+
+        return $job;
+    }
+
+    /**
+     * Sets up the callable given a controller.
+     * DEPRECATED this is maintained for BC.
+     *
+     * @param callable $controller
+     * @param string   $command
+     * @param Run      $run
+     *
+     * @return array|false
+     */
+    private function setUpControllerDeprecated($controller, $command, Run $run)
+    {
+        $command = $command;
+        if (!method_exists($controller, $command)) {
+            $run->setResult(Run::RESULT_FAILED)
+                 ->writeOutput("{$this->class}->{$command}() does not exist");
+
+            return false;
+        }
+
+        return [$controller, $command];
+    }
+
+    /**
+     * Executes the actual job.
      *
      * @param Run $run
      *
      * @return Run
      */
-    private function invokeJob(Run $run)
+    private function invoke(callable $job, Run $run)
     {
-        $class = 'App\\'.$this->job->module.'\Controller';
-
-        if (!class_exists($class)) {
-            return $run->writeOutput("$class does not exist")
-                       ->setResult(Run::RESULT_FAILED);
-        }
-
         try {
             ob_start();
 
-            $controller = new $class();
-
-            if (method_exists($controller, 'setApp')) {
-                $controller->setApp($this->job->getApp());
-            }
-
-            $command = $this->job->command;
-            if (!method_exists($controller, $command)) {
-                ob_end_clean();
-
-                return $run->setResult(Run::RESULT_FAILED)
-                           ->writeOutput("{$this->job->module}->{$this->job->command}() does not exist");
-            }
-
-            // this is where the job actually gets called
-            $ret = $controller->$command($run);
+            $ret = call_user_func($job, $run);
             $result = Run::RESULT_SUCCEEDED;
             if ($ret === false) {
                 $result = Run::RESULT_FAILED;
@@ -134,10 +225,10 @@ class Runner
      */
     private function saveRun(Run $run)
     {
-        $this->job->last_ran = time();
-        $this->job->last_run_result = $run->succeeded();
-        $this->job->last_run_output = $run->getOutput();
-        $this->job->save();
+        $this->jobModel->last_ran = time();
+        $this->jobModel->last_run_succeeded = $run->succeeded();
+        $this->jobModel->last_run_output = $run->getOutput();
+        $this->jobModel->save();
     }
 
     /**

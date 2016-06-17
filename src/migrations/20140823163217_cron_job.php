@@ -12,9 +12,6 @@ use Phinx\Migration\AbstractMigration;
 
 class CronJob extends AbstractMigration
 {
-    /**
-     * Change Method.
-     */
     public function change()
     {
         if (!$this->hasTable('CronJobs')) {
@@ -27,19 +24,5 @@ class CronJob extends AbstractMigration
                   ->addColumn('locked', 'string', ['length' => 32])
                   ->create();
         }
-    }
-
-    /**
-     * Migrate Up.
-     */
-    public function up()
-    {
-    }
-
-    /**
-     * Migrate Down.
-     */
-    public function down()
-    {
     }
 }

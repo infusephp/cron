@@ -15,7 +15,7 @@ class LockTest extends \PHPUnit_Framework_TestCase
 {
     public function testAcquireNoExpiry()
     {
-        $lock = new Lock('module', 'command');
+        $lock = new Lock('module.command');
 
         $this->assertFalse($lock->hasLock());
         $this->assertTrue($lock->acquire(0));
@@ -32,7 +32,7 @@ class LockTest extends \PHPUnit_Framework_TestCase
         $redis->shouldReceive('expire')->withArgs(['example.com:cron.module.command', 100])->andReturn(true)->once();
         $app['redis'] = $redis;
 
-        $lock = new Lock('module', 'command');
+        $lock = new Lock('module.command');
         $lock->setApp($app);
         $this->assertTrue($lock->acquire(100));
         $this->assertTrue($lock->hasLock());

@@ -16,13 +16,14 @@ class CronJobTest extends PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         Test::$app['db']->delete('CronJobs')
-                        ->where('module', 'test')
+                        ->where('id', 'test%', 'like')
                         ->execute();
     }
 
     public function testCreate()
     {
         $job = new CronJob();
+        $job->id = 'test.test';
         $job->module = 'test';
         $job->command = 'test';
         $this->assertTrue($job->save());

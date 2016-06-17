@@ -19,12 +19,7 @@ class Lock
     /**
      * @var string
      */
-    private $module;
-
-    /**
-     * @var string
-     */
-    private $command;
+    private $jobId;
 
     /**
      * @var string
@@ -38,12 +33,10 @@ class Lock
 
     /**
      * @var string
-     * @var string $command
      */
-    public function __construct($module, $command)
+    public function __construct($jobId)
     {
-        $this->module = $module;
-        $this->command = $command;
+        $this->jobId = $jobId;
         $this->hasLock = false;
     }
 
@@ -114,7 +107,7 @@ class Lock
             // namespace
             $this->name = $this->app['config']->get('app.hostname').':';
             // key
-            $this->name .= 'cron.'.$this->module.'.'.$this->command;
+            $this->name .= 'cron.'.$this->jobId;
         }
 
         return $this->name;

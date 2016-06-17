@@ -1,5 +1,5 @@
 cron
-==============
+====
 
 [![Build Status](https://travis-ci.org/infusephp/cron.svg?branch=master&style=flat)](https://travis-ci.org/infusephp/cron)
 [![Coverage Status](https://coveralls.io/repos/infusephp/cron/badge.svg?style=flat)](https://coveralls.io/r/infusephp/cron)
@@ -7,7 +7,7 @@ cron
 [![Total Downloads](https://poser.pugx.org/infuse/cron/downloads.svg?style=flat)](https://packagist.org/packages/infuse/cron)
 [![HHVM Status](http://hhvm.h4cc.de/badge/infuse/cron.svg?style=flat)](http://hhvm.h4cc.de/package/infuse/cron)
 
-Schedule tasks module for Infuse Framework
+Scheduled jobs module for Infuse Framework
 
 ## Installation
 
@@ -17,23 +17,20 @@ Schedule tasks module for Infuse Framework
 composer require infuse/cron
 ```
 
-2. Add cron jobs to the `cron` section of your app's configuration:
+2. Add scheduled jobs to the `cron` section of your app's configuration:
 ```php
 'cron' => [
 	[
-		'module' => 'test',
-		'command' => 'test',
-		'expires' => 60,
-		'successUrl' => 'http://webhook.example.com',
+		'id' => 'users:cleanup',
+		'class' => 'App\Users\ScheduledJobs\Cleanup',
 		'minute' => 0,
 		'hour' => 0,
-		'day' => '*',
-		'month' => '*',
-		'week' => '*'
+		'expires' => 60,
+		'successUrl' => 'https://webhook.example.com'
 	],
 	[
-		'module' => 'test',
-		'command' => 'test2'
+		'id' => 'orgs:bill',
+		'class' => 'App\Billing\ScheduledJobs\Bill'
 	]
 ]
 ```
@@ -49,7 +46,7 @@ And add the console command to run jobs to `console.commands` in your app's conf
 ]
 ```
 
-3. Create your jobs. Each job is a method on a module controller.
+3. Code up your jobs. Each job class must be [invokeable](http://php.net/manual/en/language.oop5.magic.php#object.invoke).
 
 4. Add this to your crontab to begin running app cron jobs in the background:
 ```bash

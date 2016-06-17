@@ -31,7 +31,7 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
         include_once 'Controller.php';
 
         Test::$app['db']->delete('CronJobs')
-                        ->where('module', 'test')
+                        ->where('id', 'test%', 'like')
                         ->execute();
     }
 
