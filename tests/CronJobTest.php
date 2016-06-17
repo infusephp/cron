@@ -10,9 +10,10 @@
  */
 namespace App\Cron\Models;
 
-use Mockery;
+use App\Cron\Libs\Run;
 use Infuse\Application;
 use Infuse\Test;
+use Mockery;
 
 function file_get_contents($cmd)
 {
@@ -71,7 +72,9 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job->module = 'test';
         $job->command = 'locked';
 
-        $this->assertEquals(CronJob::LOCKED, $job->run(100));
+        $run = $job->run(100);
+        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertEquals(Run::RESULT_LOCKED, $run->getResult());
 
         $this->assertFalse($job->exists());
     }
@@ -82,7 +85,9 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job->module = 'non_existent';
         $job->command = 'non_existent';
 
-        $this->assertEquals(CronJob::FAILED, $job->run());
+        $run = $job->run();
+        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
         $this->assertTrue($job->exists());
         $this->assertGreaterThan(0, $job->last_ran);
@@ -96,7 +101,9 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job->module = 'test';
         $job->command = 'non_existent';
 
-        $this->assertEquals(CronJob::FAILED, $job->run());
+        $run = $job->run();
+        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
         $this->assertTrue($job->exists());
         $this->assertGreaterThan(0, $job->last_ran);
@@ -110,12 +117,29 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job->module = 'test';
         $job->command = 'exception';
 
-        $this->assertEquals(CronJob::FAILED, $job->run());
+        $run = $job->run();
+        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
         $this->assertTrue($job->exists());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertFalse($job->last_run_result);
         $this->assertEquals("\ntest", $job->last_run_output);
+    }
+
+    public function testRunFailed()
+    {
+        $job = new CronJob();
+        $job->module = 'test';
+        $job->command = 'fail';
+
+        $run = $job->run();
+        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
+
+        $this->assertTrue($job->exists());
+        $this->assertGreaterThan(0, $job->last_ran);
+        $this->assertFalse($job->last_run_result);
     }
 
     public function testRunSuccess()
@@ -124,12 +148,14 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
         $job->module = 'test';
         $job->command = 'success';
 
-        $this->assertEquals(CronJob::SUCCESS, $job->run());
+        $run = $job->run();
+        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
         $this->assertTrue($job->exists());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertTrue($job->last_run_result);
-        $this->assertEquals('test', $job->last_run_output);
+        $this->assertEquals("test run obj\ntest", $job->last_run_output);
     }
 
     public function testRunSuccessWithUrl()
@@ -141,7 +167,9 @@ class CronJobTest extends \PHPUnit_Framework_TestCase
                         ->with('http://webhook.example.com/?m=yay')
                         ->once();
 
-        $this->assertEquals(CronJob::SUCCESS, $job->run(0, 'http://webhook.example.com/'));
+        $run = $job->run(0, 'http://webhook.example.com/');
+        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
         $this->assertTrue($job->exists());
         $this->assertGreaterThan(0, $job->last_ran);

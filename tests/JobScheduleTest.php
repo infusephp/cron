@@ -60,7 +60,8 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
     public function testRun()
     {
         $output = Mockery::mock('Symfony\Component\Console\Output\OutputInterface');
-        $output->shouldReceive('writeln');
+        $output->shouldReceive('writeln')
+               ->times(4);
 
         $schedule = new JobSchedule(self::$jobs);
 

@@ -10,6 +10,7 @@
  */
 namespace App\Test;
 
+use App\Cron\Libs\Run;
 use Infuse\HasApp;
 
 class Controller
@@ -21,17 +22,22 @@ class Controller
         throw new \Exception('test');
     }
 
-    public function success()
+    public function success(Run $run)
     {
         echo 'test';
+
+        $run->writeOutput('test run obj');
 
         return true;
     }
 
-    public function success_with_url()
+    public function success_with_url(Run $run)
     {
         echo 'yay';
+    }
 
-        return true;
+    public function fail()
+    {
+        return false;
     }
 }

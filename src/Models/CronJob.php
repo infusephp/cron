@@ -11,15 +11,12 @@
 namespace App\Cron\Models;
 
 use App\Cron\Libs\Lock;
+use App\Cron\Libs\Run;
 use Exception;
 use Pulsar\Model;
 
 class CronJob extends Model
 {
-    const SUCCESS = 1;
-    const LOCKED = 2;
-    const FAILED = 3;
-
     protected static $ids = ['module', 'command'];
 
     protected static $properties = [
@@ -46,49 +43,56 @@ class CronJob extends Model
      *
      * @param int    $expires    time the job has to finish
      * @param string $successUrl URL to be called upon a successful run
+     * @param Run    $run
      *
-     * @return int result
+     * @return Run result
      */
-    public function run($expires = 0, $successUrl = false)
+    public function run($expires = 0, $successUrl = false, Run $run = null)
     {
+        if (!$run) {
+            $run = new Run();
+        }
+
         $lock = new Lock($this->module, $this->command);
         $lock->setApp($this->getApp());
 
         // only run the job if we can get the lock
         if (!$lock->getLock($expires)) {
-            return self::LOCKED;
+            return $run->setResult(Run::RESULT_LOCKED);
         }
 
         // once the lock is obtained we can attempt to run the job
-        list($result, $output) = $this->invokeJob();
-        $success = $result == self::SUCCESS;
+        $this->invokeJob($run);
 
         // perform post-run tasks:
         // persist the result
-        $this->saveRun($success, $output);
+        $this->saveRun($run);
 
         // ping success URL
-        if ($success) {
-            $this->notifySuccessUrl($successUrl, $output);
+        if ($run->succeeded()) {
+            $this->pingSuccessUrl($successUrl, $run);
         }
 
         // release the lock
         $lock->releaseLock();
 
-        return $result;
+        return $run;
     }
 
     /**
      * Invokes the job.
      *
-     * @return array array(result, output)
+     * @param Run $run
+     *
+     * @return Run
      */
-    private function invokeJob()
+    private function invokeJob(Run $run)
     {
         $class = 'App\\'.$this->module.'\Controller';
 
         if (!class_exists($class)) {
-            return [self::FAILED, "$class does not exist"];
+            return $run->writeOutput("$class does not exist")
+                       ->setResult(Run::RESULT_FAILED);
         }
 
         try {
@@ -104,34 +108,35 @@ class CronJob extends Model
             if (!method_exists($controller, $command)) {
                 ob_end_clean();
 
-                return [self::FAILED, "{$this->module}->{$this->command}() does not exist"];
+                return $run->setResult(Run::RESULT_FAILED)
+                           ->writeOutput("{$this->module}->{$this->command}() does not exist");
             }
 
-            $success = $controller->$command();
+            $ret = $controller->$command($run);
+            $result = Run::RESULT_SUCCEEDED;
+            if ($ret === false) {
+                $result = Run::RESULT_FAILED;
+            }
 
-            $output = ob_get_clean();
-            $result = $success ? self::SUCCESS : self::FAILED;
-
-            return [$result, $output];
+            return $run->writeOutput(ob_get_clean())
+                       ->setResult($result);
         } catch (Exception $e) {
-            $output = ob_get_clean();
-            $output .= "\n".$e->getMessage();
-
-            return [self::FAILED, $output];
+            return $run->writeOutput(ob_get_clean())
+                       ->writeOutput($e->getMessage())
+                       ->setResult(Run::RESULT_FAILED);
         }
     }
 
     /**
      * Saves the run attempt.
      *
-     * @param bool   $success
-     * @param string $output
+     * @param Run $run
      */
-    private function saveRun($success, $output)
+    private function saveRun(Run $run)
     {
         $this->last_ran = time();
-        $this->last_run_result = $success;
-        $this->last_run_output = $output;
+        $this->last_run_result = $run->succeeded();
+        $this->last_run_output = $run->getOutput();
         $this->save();
     }
 
@@ -139,14 +144,15 @@ class CronJob extends Model
      * Pings the success URL about the successful run.
      *
      * @param string $url
-     * @param string $output
+     * @param Run    $run
      */
-    private function notifySuccessUrl($url, $output)
+    private function pingSuccessUrl($url, Run $run)
     {
         if (!$url) {
             return;
         }
 
-        @file_get_contents($url.'?m='.urlencode($output));
+        $url .= '?m='.urlencode($run->getOutput());
+        @file_get_contents($url);
     }
 }

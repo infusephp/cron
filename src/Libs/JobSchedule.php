@@ -89,9 +89,9 @@ class JobSchedule
 
         foreach ($this->getScheduledJobs() as $jobInfo) {
             $job = $jobInfo['model'];
-            $result = $this->runJob($job, $jobInfo, $output);
+            $run = $this->runJob($job, $jobInfo, $output);
 
-            $success = $result && $success;
+            $success = $run->succeeded() && $success;
         }
 
         return $success;
@@ -104,24 +104,23 @@ class JobSchedule
      * @param array           $jobInfo
      * @param OutputInterface $output
      *
-     * @return bool succeeded?
+     * @return Run $run
      */
     private function runJob(CronJob $job, array $jobInfo, OutputInterface $output)
     {
         $output->writeln("-- Starting {$job->module}.{$job->command}:");
 
-        $result = $job->run($jobInfo['expires'], $jobInfo['successUrl']);
+        $run = new Run($output);
+        $job->run($jobInfo['expires'], $jobInfo['successUrl'], $run);
 
-        if ($result == CronJob::SUCCESS) {
-            $output->writeln($job->last_run_output);
+        if ($run->succeeded()) {
             $output->writeln('-- Success!');
-        } elseif ($result == CronJob::LOCKED) {
+        } elseif ($run->getResult() == Run::RESULT_LOCKED) {
             $output->writeln("{$job->module}.{$job->command} is locked!");
-        } elseif ($result == CronJob::FAILED) {
-            $output->writeln($job->last_run_output);
+        } elseif ($run->failed()) {
             $output->writeln('-- Failed!');
         }
 
-        return $result == CronJob::SUCCESS;
+        return $run;
     }
 }
