@@ -17,40 +17,55 @@ Scheduled jobs module for Infuse Framework
    composer require infuse/cron
    ```
 
-2. Add scheduled jobs to the `cron` section of your app's configuration:
-
-   ```php
-   'cron' => [
-      	[
-	       'id' => 'users:cleanup',
-		   'class' => 'App\Users\ScheduledJobs\Cleanup',
-		   'minute' => 0,
-		   'hour' => 0,
-		   'expires' => 60,
-		   'successUrl' => 'https://webhook.example.com'
-	   ],
-	   [
-   		   'id' => 'orgs:bill',
-		   'class' => 'App\Billing\ScheduledJobs\Bill'
-	   ]
-   ]
-   ```
-
-   And add the console command to run jobs to `console.commands` in your app's configuration:
+2. Add the console command to run jobs to `console.commands` in your app's configuration:
    
    ```php
    'console' => [
-	   // ...
-	   'commands' => [
-		   // ...
-		   'App\Cron\Console\RunScheduledCommand'
-	   ]
+      // ...
+      'commands' => [
+         // ...
+         'App\Cron\Console\RunScheduledCommand'
+      ]
    ]
    ```
 
-3. Code up your jobs. Each job class must be [invokeable](http://php.net/manual/en/language.oop5.magic.php#object.invoke).
+3. Add the migration to your app's configuration:
 
-4. Add this to your crontab to begin running app cron jobs in the background:
+   ```php
+   'modules' => [
+      'migrations' => [
+         // ...
+         'Cron'
+      ],
+      'migrationPaths' => [
+         // ...
+         'Cron' => 'vendor/infuse/cron/src/migrations'
+      ]
+   ]
+   ```
+
+4. Add scheduled jobs to the `cron` section of your app's configuration:
+
+   ```php
+   'cron' => [
+      [
+         'id' => 'users:cleanup',
+         'class' => 'App\Users\ScheduledJobs\Cleanup',
+         'minute' => 0,
+         'hour' => 0,
+         'expires' => 60,
+         'successUrl' => 'https://webhook.example.com'
+      ],
+      [
+         'id' => 'orgs:bill',
+         'class' => 'App\Billing\ScheduledJobs\Bill'
+      ]
+   ]
+   ```
+
+5. Code up your jobs. Each job class must be [invokeable](http://php.net/manual/en/language.oop5.magic.php#object.invoke).
+
+6. Add this to your crontab to begin running app cron jobs in the background:
 
    ```bash
    *	*	*	*	*	php /var/www/example.com/infuse run-scheduled

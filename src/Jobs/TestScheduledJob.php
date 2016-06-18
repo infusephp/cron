@@ -8,18 +8,22 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron;
+namespace App\Cron\Jobs;
 
+use App\Cron\Libs\Run;
 use Infuse\HasApp;
+use Swift_Mailer;
+use Swift_Message;
+use Swift_SmtpTransport;
 
 /**
  * @codeCoverageIgnore
  */
-class Controller
+class TestScheduledJob
 {
     use HasApp;
 
-    public function test()
+    public function __invoke(Run $run)
     {
         // this is a sample cron job for testing purposes
 
@@ -28,15 +32,15 @@ class Controller
         $body = "This is a cron job test\n$t";
 
         // Create the Transport
-        $transport = \Swift_SmtpTransport::newInstance($this->app['config']->get('smtp.host'), $this->app['config']->get('smtp.port'))
+        $transport = Swift_SmtpTransport::newInstance($this->app['config']->get('smtp.host'), $this->app['config']->get('smtp.port'))
           ->setUsername($this->app['config']->get('smtp.username'))
           ->setPassword($this->app['config']->get('smtp.password'));
 
         // Create the Mailer using your created Transport
-        $mailer = \Swift_Mailer::newInstance($transport);
+        $mailer = Swift_Mailer::newInstance($transport);
 
         // Create a message
-        $message = \Swift_Message::newInstance($subject)
+        $message = Swift_Message::newInstance($subject)
           ->setFrom([$this->app['config']->get('app.email') => $this->app['config']->get('app.title')])
           ->setTo([$this->app['config']->get('app.email') => $this->app['config']->get('app.title')])
           ->setBody(nl2br($body), 'text/html')
