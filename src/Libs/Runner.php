@@ -212,6 +212,9 @@ class Runner
             return $run->writeOutput(ob_get_clean())
                        ->setResult($result);
         } catch (Exception $e) {
+            $app = $this->jobModel->getApp();
+            $app['logger']->error("An uncaught exception occurred while running the {$this->jobModel->id()} scheduled job.", ['exception' => $e]);
+
             return $run->writeOutput(ob_get_clean())
                        ->writeOutput($e->getMessage())
                        ->setResult(Run::RESULT_FAILED);
