@@ -8,8 +8,8 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-use App\Cron\Libs\CronDate;
-use App\Cron\Libs\DateParameters;
+use Infuse\Cron\Libs\CronDate;
+use Infuse\Cron\Libs\DateParameters;
 
 class CronDateTest extends PHPUnit_Framework_TestCase
 {

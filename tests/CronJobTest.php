@@ -8,7 +8,7 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-use App\Cron\Models\CronJob;
+use Infuse\Cron\Models\CronJob;
 use Infuse\Test;
 
 class CronJobTest extends PHPUnit_Framework_TestCase

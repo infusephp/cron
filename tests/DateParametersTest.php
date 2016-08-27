@@ -8,7 +8,7 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-use App\Cron\Libs\DateParameters;
+use Infuse\Cron\Libs\DateParameters;
 
 class DateParametersTest extends PHPUnit_Framework_TestCase
 {

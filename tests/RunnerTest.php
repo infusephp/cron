@@ -8,9 +8,10 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron\Libs;
 
-use App\Cron\Models\CronJob;
+namespace Infuse\Cron\Libs;
+
+use Infuse\Cron\Models\CronJob;
 use Infuse\Application;
 use Infuse\Test;
 use Mockery;
@@ -80,7 +81,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $runner = new Runner($job, '');
 
         $run = $runner->go(100);
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_LOCKED, $run->getResult());
 
         $this->assertFalse($job->exists());
@@ -95,7 +96,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $runner = new Runner($job, '');
 
         $run = $runner->go();
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
         $this->assertTrue($job->exists());
@@ -113,7 +114,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $runner = new Runner($job, '');
 
         $run = $runner->go();
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
         $this->assertTrue($job->exists());
@@ -131,7 +132,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $runner = new Runner($job, '');
 
         $run = $runner->go();
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
         $this->assertTrue($job->exists());
@@ -149,7 +150,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $runner = new Runner($job, '');
 
         $run = $runner->go();
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
         $this->assertTrue($job->exists());
@@ -166,7 +167,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $runner = new Runner($job, '');
 
         $run = $runner->go();
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
         $this->assertTrue($job->exists());
@@ -182,7 +183,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $runner = new Runner($job, 'App\Test\TestJob');
 
         $run = $runner->go();
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
         $this->assertTrue($job->exists());
@@ -204,7 +205,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
                         ->once();
 
         $run = $runner->go(0, 'http://webhook.example.com/');
-        $this->assertInstanceOf('App\Cron\Libs\Run', $run);
+        $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
         $this->assertTrue($job->exists());

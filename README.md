@@ -24,7 +24,7 @@ Scheduled jobs module for Infuse Framework
       // ...
       'commands' => [
          // ...
-         'App\Cron\Console\RunScheduledCommand'
+         'Infuse\Cron\Console\RunScheduledCommand'
       ]
    ]
    ```

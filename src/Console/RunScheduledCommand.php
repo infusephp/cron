@@ -8,9 +8,10 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron\Console;
 
-use App\Cron\Libs\JobSchedule;
+namespace Infuse\Cron\Console;
+
+use Infuse\Cron\Libs\JobSchedule;
 use Infuse\HasApp;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

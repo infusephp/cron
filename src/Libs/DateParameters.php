@@ -8,7 +8,8 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron\Libs;
+
+namespace Infuse\Cron\Libs;
 
 use InvalidArgumentException;
 

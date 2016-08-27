@@ -14,8 +14,8 @@
 return  [
   'services' => [
     'db' => 'JAQB\Services\Database',
-    'errors' => 'App\Cron\Services\ErrorStack',
-    'model_driver' => 'App\Cron\Services\ModelDriver',
+    'errors' => 'Infuse\Cron\Services\ErrorStack',
+    'model_driver' => 'Infuse\Cron\Services\ModelDriver',
     'pdo' => 'Infuse\Services\Pdo',
   ],
   'models' => [

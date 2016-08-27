@@ -8,7 +8,7 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-use App\Cron\Libs\Run;
+use Infuse\Cron\Libs\Run;
 
 class RunTest extends PHPUnit_Framework_TestCase
 {

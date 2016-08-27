@@ -8,7 +8,7 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-use App\Cron\Libs\JobSchedule;
+use Infuse\Cron\Libs\JobSchedule;
 use Infuse\Test;
 
 class JobScheduleTest extends PHPUnit_Framework_TestCase
@@ -48,11 +48,11 @@ class JobScheduleTest extends PHPUnit_Framework_TestCase
 
         $this->assertCount(2, $jobs);
 
-        $this->assertInstanceOf('App\Cron\Models\CronJob', $jobs[0]['model']);
+        $this->assertInstanceOf('Infuse\Cron\Models\CronJob', $jobs[0]['model']);
         $this->assertEquals('test', $jobs[0]['model']->module);
         $this->assertEquals('success_with_url', $jobs[0]['model']->command);
 
-        $this->assertInstanceOf('App\Cron\Models\CronJob', $jobs[1]['model']);
+        $this->assertInstanceOf('Infuse\Cron\Models\CronJob', $jobs[1]['model']);
         $this->assertEquals('test', $jobs[1]['model']->module);
         $this->assertEquals('success', $jobs[1]['model']->command);
     }

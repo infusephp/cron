@@ -8,7 +8,8 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron\Models;
+
+namespace Infuse\Cron\Models;
 
 use Pulsar\Model;
 

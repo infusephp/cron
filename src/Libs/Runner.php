@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Cron\Libs;
+namespace Infuse\Cron\Libs;
 
-use App\Cron\Models\CronJob;
+use Infuse\Cron\Models\CronJob;
 use Exception;
 
 class Runner

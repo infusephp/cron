@@ -8,7 +8,8 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron\Services;
+
+namespace Infuse\Cron\Services;
 
 use Pulsar\Model;
 use Pulsar\Validate;

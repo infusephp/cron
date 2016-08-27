@@ -8,9 +8,10 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron\Jobs;
 
-use App\Cron\Libs\Run;
+namespace Infuse\Cron\Jobs;
+
+use Infuse\Cron\Libs\Run;
 use Infuse\HasApp;
 use Swift_Mailer;
 use Swift_Message;

@@ -8,9 +8,10 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
-namespace App\Cron\Libs;
 
-use App\Cron\Models\CronJob;
+namespace Infuse\Cron\Libs;
+
+use Infuse\Cron\Models\CronJob;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class JobSchedule
