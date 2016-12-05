@@ -24,7 +24,7 @@ class RunScheduledCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('run-scheduled')
+            ->setName('cron:run')
             ->setDescription('Runs any scheduled jobs');
     }
 

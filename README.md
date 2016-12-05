@@ -68,7 +68,7 @@ Scheduled jobs module for Infuse Framework
 6. Add this to your crontab to begin running app cron jobs in the background:
 
    ```bash
-   *	*	*	*	*	php /var/www/example.com/infuse run-scheduled
+   *	*	*	*	*	php /var/www/example.com/infuse cron:run
    ```
 
 ### Webhooks
