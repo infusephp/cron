@@ -11,10 +11,13 @@
 
 namespace Infuse\Cron\Models;
 
+use Infuse\HasApp;
 use Pulsar\Model;
 
 class CronJob extends Model
 {
+    use HasApp;
+
     protected static $properties = [
         'id' => [
             'required' => true,
