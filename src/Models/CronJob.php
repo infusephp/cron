@@ -35,4 +35,8 @@ class CronJob extends Model
             'null' => true,
         ],
     ];
+
+    protected static $casts = [];
+    protected static $validations = [];
+    protected static $protected = [];
 }
