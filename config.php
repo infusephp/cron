@@ -9,17 +9,23 @@
  * @license MIT
  */
 
+use Infuse\Services\Pdo;
+use JAQB\Services\Database;
+use Pulsar\Driver\DatabaseDriver;
+use Pulsar\Services\ErrorStack;
+use Pulsar\Services\ModelDriver;
+
 /* This configuration is used to run the tests */
 
 return  [
-  'services' => [
-    'db' => 'JAQB\Services\Database',
-    'errors' => 'Infuse\Cron\Services\ErrorStack',
-    'model_driver' => 'Infuse\Cron\Services\ModelDriver',
-    'pdo' => 'Infuse\Services\Pdo',
+    'services' => [
+    'db' => Database::class,
+    'errors' => ErrorStack::class,
+    'model_driver' => ModelDriver::class,
+    'pdo' => Pdo::Class,
   ],
   'models' => [
-    'driver' => 'Pulsar\Driver\DatabaseDriver',
+    'driver' => DatabaseDriver::class,
   ],
   'database' => [
     'type' => 'mysql',
