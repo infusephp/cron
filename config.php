@@ -20,9 +20,9 @@ use Pulsar\Services\ModelDriver;
 return  [
     'services' => [
     'db' => Database::class,
+    'pdo' => Pdo::Class,
     'errors' => ErrorStack::class,
     'model_driver' => ModelDriver::class,
-    'pdo' => Pdo::Class,
   ],
   'models' => [
     'driver' => DatabaseDriver::class,
