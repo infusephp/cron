@@ -9,8 +9,7 @@
  * @license MIT
  */
 
-use Infuse\Services\Pdo;
-use JAQB\Services\Database;
+use JAQB\Services\ConnectionManager;
 use Pulsar\Driver\DatabaseDriver;
 use Pulsar\Services\ErrorStack;
 use Pulsar\Services\ModelDriver;
@@ -19,41 +18,42 @@ use Pulsar\Services\ModelDriver;
 
 return  [
     'services' => [
-    'db' => Database::class,
-    'pdo' => Pdo::Class,
-    'errors' => ErrorStack::class,
-    'model_driver' => ModelDriver::class,
-  ],
-  'models' => [
-    'driver' => DatabaseDriver::class,
-  ],
-  'database' => [
-    'type' => 'mysql',
-    'user' => 'root',
-    'password' => '',
-    'host' => '127.0.0.1',
-    'name' => 'mydb',
-  ],
-  'sessions' => [
-    'enabled' => true,
-    'adapter' => 'database',
-    'lifetime' => 86400,
-  ],
-  'cron' => [
-    [
-      'module' => 'test',
-      'command' => 'test',
-      'expires' => 60,
-      'successUrl' => 'http://webhook.example.com',
-      'minute' => 0,
-      'hour' => 0,
-      'day' => '*',
-      'month' => '*',
-      'week' => '*',
+        'database' => ConnectionManager::class,
+        'errors' => ErrorStack::class,
+        'model_driver' => ModelDriver::class,
     ],
-    [
-      'module' => 'test',
-      'command' => 'test2',
+    'models' => [
+        'driver' => DatabaseDriver::class,
     ],
-  ],
+    'database' => [
+        'test' => [
+            'type' => 'mysql',
+            'user' => 'root',
+            'password' => '',
+            'host' => '127.0.0.1',
+            'name' => 'mydb',
+        ]
+    ],
+    'sessions' => [
+        'enabled' => true,
+        'adapter' => 'database',
+        'lifetime' => 86400,
+    ],
+    'cron' => [
+        [
+            'module' => 'test',
+            'command' => 'test',
+            'expires' => 60,
+            'successUrl' => 'http://webhook.example.com',
+            'minute' => 0,
+            'hour' => 0,
+            'day' => '*',
+            'month' => '*',
+            'week' => '*',
+        ],
+        [
+            'module' => 'test',
+            'command' => 'test2',
+        ],
+    ],
 ];

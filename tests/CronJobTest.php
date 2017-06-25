@@ -15,9 +15,10 @@ class CronJobTest extends PHPUnit_Framework_TestCase
 {
     public static function setUpBeforeClass()
     {
-        Test::$app['db']->delete('CronJobs')
-                        ->where('id', 'test%', 'like')
-                        ->execute();
+        Test::$app['database']->getDefault()
+            ->delete('CronJobs')
+            ->where('id', 'test%', 'like')
+            ->execute();
     }
 
     public function testCreate()

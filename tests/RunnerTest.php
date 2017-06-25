@@ -30,13 +30,15 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         include_once 'TestJob.php';
         include_once 'Controller.php';
 
-        Test::$app['db']->delete('CronJobs')
-                        ->where('id', 'test%', 'like')
-                        ->execute();
+        Test::$app['database']->getDefault()
+            ->delete('CronJobs')
+            ->where('id', 'test%', 'like')
+            ->execute();
 
-        Test::$app['db']->delete('CronJobs')
-                        ->where('id', 'non_existent%', 'like')
-                        ->execute();
+        Test::$app['database']->getDefault()
+            ->delete('CronJobs')
+            ->where('id', 'non_existent%', 'like')
+            ->execute();
     }
 
     public function setUp()
