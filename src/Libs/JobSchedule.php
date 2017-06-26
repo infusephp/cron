@@ -53,10 +53,10 @@ class JobSchedule
                 $job['id'] = $job['module'].'.'.$job['command'];
             }
 
-            $model = new CronJob($job['id']);
+            $model = CronJob::find($job['id']);
 
             // create a new model if this is the job's first run
-            if (!$model->exists()) {
+            if (!$model) {
                 $model = new CronJob();
                 $model->id = $job['id'];
 

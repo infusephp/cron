@@ -86,7 +86,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_LOCKED, $run->getResult());
 
-        $this->assertFalse($job->exists());
+        $this->assertFalse($job->persisted());
     }
 
     public function testGoClassDoesNotExist()
@@ -101,7 +101,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
-        $this->assertTrue($job->exists());
+        $this->assertTrue($job->persisted());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertFalse($job->last_run_succeeded);
         $this->assertEquals('App\non_existent\Controller does not exist', $job->last_run_output);
@@ -119,7 +119,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
-        $this->assertTrue($job->exists());
+        $this->assertTrue($job->persisted());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertFalse($job->last_run_succeeded);
         $this->assertEquals('App\test\Controller->non_existent() does not exist', $job->last_run_output);
@@ -137,7 +137,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
-        $this->assertTrue($job->exists());
+        $this->assertTrue($job->persisted());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertFalse($job->last_run_succeeded);
         $this->assertEquals('test', $job->last_run_output);
@@ -155,7 +155,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_FAILED, $run->getResult());
 
-        $this->assertTrue($job->exists());
+        $this->assertTrue($job->persisted());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertFalse($job->last_run_succeeded);
     }
@@ -172,7 +172,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
-        $this->assertTrue($job->exists());
+        $this->assertTrue($job->persisted());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertTrue($job->last_run_succeeded);
         $this->assertEquals("test run obj\ntest", $job->last_run_output);
@@ -188,7 +188,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
-        $this->assertTrue($job->exists());
+        $this->assertTrue($job->persisted());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertTrue($job->last_run_succeeded);
         $this->assertEquals('works', $job->last_run_output);
@@ -210,7 +210,7 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
         $this->assertEquals(Run::RESULT_SUCCEEDED, $run->getResult());
 
-        $this->assertTrue($job->exists());
+        $this->assertTrue($job->persisted());
         $this->assertGreaterThan(0, $job->last_ran);
         $this->assertTrue($job->last_run_succeeded);
         $this->assertEquals('yay', $job->last_run_output);

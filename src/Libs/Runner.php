@@ -23,15 +23,13 @@ class Runner
     private $class;
 
     /**
-     * DEPRECATED this is kept for BC.
-     *
+     * @deprecated
      * @var string|null
      */
     private $module;
 
     /**
-     * DEPRECATED this is kept for BC.
-     *
+     * @deprecated
      * @var string|null
      */
     private $command;
@@ -57,6 +55,8 @@ class Runner
     }
 
     /**
+     * @deprecated
+     *
      * Sets the callable class from a module and command argument.
      *
      * @var string|null deprecated module argument
@@ -169,8 +169,9 @@ class Runner
     }
 
     /**
+     * @deprecated
+     *
      * Sets up the callable given a controller.
-     * DEPRECATED this is maintained for BC.
      *
      * @param callable $controller
      * @param string   $command
@@ -180,7 +181,6 @@ class Runner
      */
     private function setUpControllerDeprecated($controller, $command, Run $run)
     {
-        $command = $command;
         if (!method_exists($controller, $command)) {
             $run->setResult(Run::RESULT_FAILED)
                  ->writeOutput("{$this->class}->{$command}() does not exist");
