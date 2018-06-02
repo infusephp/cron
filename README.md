@@ -5,7 +5,6 @@ cron
 [![Coverage Status](https://coveralls.io/repos/infusephp/cron/badge.svg?style=flat)](https://coveralls.io/r/infusephp/cron)
 [![Latest Stable Version](https://poser.pugx.org/infuse/cron/v/stable.svg?style=flat)](https://packagist.org/packages/infuse/cron)
 [![Total Downloads](https://poser.pugx.org/infuse/cron/downloads.svg?style=flat)](https://packagist.org/packages/infuse/cron)
-[![HHVM Status](http://hhvm.h4cc.de/badge/infuse/cron.svg?style=flat)](http://hhvm.h4cc.de/package/infuse/cron)
 
 Scheduled jobs module for Infuse Framework
 
