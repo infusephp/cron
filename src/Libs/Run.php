@@ -25,7 +25,7 @@ class Run
     private $output = [];
 
     /**
-     * @var int
+     * @var string
      */
     private $result;
 
@@ -69,7 +69,7 @@ class Run
     /**
      * Sets the result of the run.
      *
-     * @param int $result
+     * @param string $result
      *
      * @return self
      */
@@ -83,7 +83,7 @@ class Run
     /**
      * Gets the result of the run.
      *
-     * @return int
+     * @return string
      */
     public function getResult()
     {

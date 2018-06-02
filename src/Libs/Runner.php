@@ -3,8 +3,11 @@
 namespace Infuse\Cron\Libs;
 
 use Exception;
+use Infuse\Cron\Events\CronJobBeginEvent;
+use Infuse\Cron\Events\CronJobFinishedEvent;
 use Infuse\Cron\Models\CronJob;
 use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Lock\Factory;
 
 class Runner
@@ -17,6 +20,11 @@ class Runner
     private $jobModel;
 
     /**
+     * @var EventDispatcher
+     */
+    private $dispatcher;
+
+    /**
      * @var Lock
      */
     private $lock;
@@ -27,15 +35,17 @@ class Runner
     private $class;
 
     /**
-     * @param CronJob $job
-     * @param string  $class       callable job class
-     * @param Factory $lockFactory
-     * @param string  $namespace
+     * @param CronJob         $job
+     * @param string          $class       callable job class
+     * @param EventDispatcher $dispatcher
+     * @param Factory         $lockFactory
+     * @param string          $namespace
      */
-    public function __construct(CronJob $job, $class, Factory $lockFactory, $namespace = '')
+    public function __construct(CronJob $job, $class, EventDispatcher $dispatcher, Factory $lockFactory, $namespace = '')
     {
         $this->jobModel = $job;
         $this->class = $class;
+        $this->dispatcher = $dispatcher;
         $this->lock = new Lock($this->jobModel->id, $lockFactory, $namespace);
     }
 
@@ -79,15 +89,27 @@ class Runner
             return $run->setResult(Run::RESULT_LOCKED);
         }
 
+        // call the `cron_job.begin` event
+        $event = new CronJobBeginEvent($this->jobModel->id);
+        $this->dispatcher->dispatch($event::NAME, $event);
+        if ($event->isPropagationStopped()) {
+            $run->writeOutput('Rejected by cron_job.begin event listener')
+                ->setResult(Run::RESULT_FAILED);
+        }
+
         // set up the callable
         $job = $this->setUp($this->class, $run);
 
         // this is where the job actually gets called
-        if ($job) {
+        if ($job && !$event->isPropagationStopped()) {
             $this->invoke($job, $run);
         }
 
         // perform post-run tasks:
+        // call the `cron_job.finished` event
+        $event = new CronJobFinishedEvent($this->jobModel->id, $run->getResult());
+        $this->dispatcher->dispatch($event::NAME, $event);
+
         // persist the result
         $this->saveRun($run);
 
@@ -181,7 +203,9 @@ class Runner
     }
 
     /**
-     * Pings a URL about a successful run.
+     * @deprecated should be moved to an event listener
+     *
+     * Pings a URL about a successful run
      *
      * @param string $url
      * @param Run    $run

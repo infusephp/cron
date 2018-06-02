@@ -70,6 +70,23 @@ Scheduled jobs module for Infuse Framework
    *	*	*	*	*	php /var/www/example.com/infuse cron:run
    ```
 
+### Events
+
+You can subscribe to events with [event subscribers](https://symfony.com/doc/current/components/event_dispatcher.html#using-event-subscribers) from the symfony/event-dispatcher component. Your subscribers an listen to these events:
+
+- `schedule_run.begin`
+- `schedule_run.finished`
+- `cron_job.begin`
+- `cron_job.finished`
+
+When you have created an [event subscriber](https://symfony.com/doc/current/components/event_dispatcher.html#using-event-subscribers) you can add it to your config like this: 
+
+```php
+'cronSubscribers' => [
+    'App\EventSubscribers\MySubscriber'
+]
+```
+
 ### Webhooks
 
 You can optionally specify a URL that will be called upon a successful run. The output from the run will be available using the `m` query parameter. This was designed to be compatible with [Dead Man's Snitch](https://deadmanssnitch.com/).

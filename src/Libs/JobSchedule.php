@@ -11,9 +11,13 @@
 
 namespace Infuse\Cron\Libs;
 
+use Infuse\Cron\Events\ScheduleRunBeginEvent;
+use Infuse\Cron\Events\ScheduleRunFinishedEvent;
 use Infuse\Cron\Models\CronJob;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Lock\Factory;
 
 class JobSchedule
@@ -24,6 +28,11 @@ class JobSchedule
      * @var array
      */
     private $jobs;
+
+    /**
+     * @var EventDispatcher
+     */
+    private $dispatcher;
 
     /**
      * @var Factory
@@ -45,6 +54,7 @@ class JobSchedule
         $this->jobs = $jobs;
         $this->lockFactory = $lockFactory;
         $this->namespace = $namespace;
+        $this->dispatcher = new EventDispatcher();
     }
 
     /**
@@ -55,6 +65,46 @@ class JobSchedule
     public function getAllJobs()
     {
         return $this->jobs;
+    }
+
+    /**
+     * Gets the event dispatcher.
+     *
+     * @return EventDispatcher
+     */
+    public function getEventDispatcher()
+    {
+        return $this->dispatcher;
+    }
+
+    /**
+     * Registers a listener for an event.
+     *
+     * @param string   $eventName
+     * @param callable $listener
+     * @param int      $priority
+     *
+     * @return $this
+     */
+    public function listen($eventName, callable $listener, $priority = 0)
+    {
+        $this->dispatcher->addListener($eventName, $listener, $priority);
+
+        return $this;
+    }
+
+    /**
+     * Registers an event subscriber.
+     *
+     * @param EventSubscriberInterface $subscriber
+     *
+     * @return $this
+     */
+    public function subscribe(EventSubscriberInterface $subscriber)
+    {
+        $this->dispatcher->addSubscriber($subscriber);
+
+        return $this;
     }
 
     /**
@@ -106,12 +156,18 @@ class JobSchedule
     {
         $success = true;
 
+        $event = new ScheduleRunBeginEvent();
+        $this->dispatcher->dispatch($event::NAME, $event);
+
         foreach ($this->getScheduledJobs() as $jobInfo) {
             $job = $jobInfo['model'];
             $run = $this->runJob($job, $jobInfo, $output);
 
             $success = $run->succeeded() && $success;
         }
+
+        $event = new ScheduleRunFinishedEvent();
+        $this->dispatcher->dispatch($event::NAME, $event);
 
         return $success;
     }
@@ -131,7 +187,7 @@ class JobSchedule
 
         // set up the runner
         $class = array_value($jobInfo, 'class');
-        $runner = new Runner($job, $class, $this->lockFactory, $this->namespace);
+        $runner = new Runner($job, $class, $this->dispatcher, $this->lockFactory, $this->namespace);
         if ($this->logger) {
             $runner->setLogger($this->logger);
         }

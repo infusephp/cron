@@ -42,8 +42,25 @@ class RunScheduledCommand extends Command
         $lockFactory = $this->app['lock_factory'];
         $namespace = $this->app['config']->get('app.hostname');
         $schedule = new JobSchedule($jobs, $lockFactory, $namespace);
+        $this->addSubscribers($schedule);
         $schedule->setLogger($this->app['logger']);
 
         return $schedule;
+    }
+
+    /**
+     * @param JobSchedule $schedule
+     */
+    private function addSubscribers(JobSchedule $schedule)
+    {
+        $subscribers = $this->app['config']->get('cronSubscribers', []);
+        foreach ($subscribers as $class) {
+            $subscriber = new $class();
+            if (method_exists($subscriber, 'setApp')) {
+                $subscriber->setApp($this->app);
+            }
+
+            $schedule->subscribe($subscriber);
+        }
     }
 }

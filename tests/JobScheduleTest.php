@@ -11,6 +11,8 @@
 
 namespace Infuse\Cron\Tests;
 
+use Infuse\Cron\Events\ScheduleRunBeginEvent;
+use Infuse\Cron\Events\ScheduleRunFinishedEvent;
 use Infuse\Cron\Libs\JobSchedule;
 use Infuse\Cron\Models\CronJob;
 use Infuse\Cron\Tests\Jobs\FailJob;
@@ -46,6 +48,8 @@ class JobScheduleTest extends MockeryTestCase
         ],
     ];
     public static $lockFactory;
+    public static $beginEvent;
+    public static $finishedEvent;
 
     public static function setUpBeforeClass()
     {
@@ -61,16 +65,19 @@ class JobScheduleTest extends MockeryTestCase
         $lock->acquire();
     }
 
+    private function getSchedule()
+    {
+        return new JobSchedule(self::$jobs, self::$lockFactory);
+    }
+
     public function testGetAllJobs()
     {
-        $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
-        $this->assertEquals(self::$jobs, $schedule->getAllJobs());
+        $this->assertEquals(self::$jobs, $this->getSchedule()->getAllJobs());
     }
 
     public function testGetScheduledJobs()
     {
-        $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
-        $jobs = $schedule->getScheduledJobs();
+        $jobs = $this->getSchedule()->getScheduledJobs();
 
         $this->assertCount(4, $jobs);
 
@@ -93,7 +100,16 @@ class JobScheduleTest extends MockeryTestCase
         $output->shouldReceive('writeln')
             ->atLeast(1);
 
-        $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
+        $schedule = $this->getSchedule();
+        $schedule->listen(ScheduleRunBeginEvent::NAME, function (ScheduleRunBeginEvent $event) {
+            JobScheduleTest::$beginEvent = $event;
+        });
+        $schedule->listen(ScheduleRunFinishedEvent::NAME, function (ScheduleRunFinishedEvent $event) {
+            JobScheduleTest::$finishedEvent = $event;
+        });
+
+        $subscriber = new TestEventSubscriber();
+        $schedule->subscribe($subscriber);
 
         $this->assertFalse($schedule->runScheduled($output));
 
@@ -104,5 +120,8 @@ class JobScheduleTest extends MockeryTestCase
         $this->assertEquals('test.success', $jobs[0]['model']->id);
         $this->assertEquals('test.locked', $jobs[1]['model']->id);
         $this->assertEquals('test.failed', $jobs[2]['model']->id);
+
+        $this->assertInstanceOf(ScheduleRunBeginEvent::class, self::$beginEvent);
+        $this->assertInstanceOf(ScheduleRunFinishedEvent::class, self::$finishedEvent);
     }
 }
