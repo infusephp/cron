@@ -15,13 +15,14 @@ use Infuse\Cron\Models\CronJob;
 use Infuse\Application;
 use Infuse\Test;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 function file_get_contents($cmd)
 {
     return RunnerTest::$functions->file_get_contents($cmd);
 }
 
-class RunnerTest extends \PHPUnit_Framework_TestCase
+class RunnerTest extends MockeryTestCase
 {
     public static $functions;
 
@@ -66,20 +67,19 @@ class RunnerTest extends \PHPUnit_Framework_TestCase
 
     public function testGoLocked()
     {
-        $app = new Application();
-        $app['config']->set('app.hostname', 'example.com');
+        Test::$app['config']->set('app.hostname', 'example.com');
         $redis = Mockery::mock();
         $redis->shouldReceive('setnx')
               ->withArgs(['example.com:cron.test.locked', 100])
               ->andReturn(false)
               ->once();
-        $app['redis'] = $redis;
-        CronJob::inject($app);
+        Test::$app['redis'] = $redis;
 
         $job = new CronJob();
         $job->id = 'test.locked';
         $job->module = 'test';
         $job->command = 'locked';
+        $job->setApp(Test::$app);
         $runner = new Runner($job, '');
 
         $run = $runner->go(100);

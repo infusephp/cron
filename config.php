@@ -19,7 +19,6 @@ use Pulsar\Services\ModelDriver;
 return  [
     'services' => [
         'database' => ConnectionManager::class,
-        'errors' => ErrorStack::class,
         'model_driver' => ModelDriver::class,
     ],
     'models' => [
@@ -33,11 +32,6 @@ return  [
             'host' => '127.0.0.1',
             'name' => 'mydb',
         ]
-    ],
-    'sessions' => [
-        'enabled' => true,
-        'adapter' => 'database',
-        'lifetime' => 86400,
     ],
     'cron' => [
         [

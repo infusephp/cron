@@ -9,8 +9,9 @@
  * @license MIT
  */
 use Infuse\Cron\Libs\Run;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class RunTest extends PHPUnit_Framework_TestCase
+class RunTest extends MockeryTestCase
 {
     public function testWriteOutput()
     {

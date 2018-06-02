@@ -10,8 +10,9 @@
  */
 use Infuse\Cron\Libs\CronDate;
 use Infuse\Cron\Libs\DateParameters;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class CronDateTest extends PHPUnit_Framework_TestCase
+class CronDateTest extends MockeryTestCase
 {
     public function testGetParams()
     {

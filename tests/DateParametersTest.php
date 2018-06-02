@@ -9,8 +9,9 @@
  * @license MIT
  */
 use Infuse\Cron\Libs\DateParameters;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class DateParametersTest extends PHPUnit_Framework_TestCase
+class DateParametersTest extends MockeryTestCase
 {
     public function testDefault()
     {

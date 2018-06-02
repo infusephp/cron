@@ -10,8 +10,9 @@
  */
 use Infuse\Cron\Libs\Lock;
 use Infuse\Application;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class LockTest extends \PHPUnit_Framework_TestCase
+class LockTest extends MockeryTestCase
 {
     public function testAcquireNoExpiry()
     {

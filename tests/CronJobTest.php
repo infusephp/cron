@@ -10,8 +10,9 @@
  */
 use Infuse\Cron\Models\CronJob;
 use Infuse\Test;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class CronJobTest extends PHPUnit_Framework_TestCase
+class CronJobTest extends MockeryTestCase
 {
     public static function setUpBeforeClass()
     {

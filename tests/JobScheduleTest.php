@@ -10,8 +10,9 @@
  */
 use Infuse\Cron\Libs\JobSchedule;
 use Infuse\Test;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class JobScheduleTest extends PHPUnit_Framework_TestCase
+class JobScheduleTest extends MockeryTestCase
 {
     public static $jobs = [
         [
