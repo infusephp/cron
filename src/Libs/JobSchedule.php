@@ -66,27 +66,13 @@ class JobSchedule
     {
         $jobs = [];
         foreach ($this->jobs as $job) {
-            // DEPRECATED this is kept for BC
-            if (!isset($job['id'])) {
-                $job['id'] = $job['module'].'.'.$job['command'];
-            }
-
             $model = CronJob::find($job['id']);
 
             // create a new model if this is the job's first run
             if (!$model) {
                 $model = new CronJob();
                 $model->id = $job['id'];
-
-                // DEPRECATED this is kept for BC
-                if (isset($job['module'])) {
-                    $model->module = $job['module'];
-                }
-
-                // DEPRECATED this is kept for BC
-                if (isset($job['command'])) {
-                    $model->command = $job['command'];
-                }
+                $model->save();
             }
 
             // check if scheduled to run

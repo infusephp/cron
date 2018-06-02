@@ -3,7 +3,7 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
@@ -15,9 +15,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Run
 {
-    const RESULT_SUCCEEDED = 1;
-    const RESULT_LOCKED = 2;
-    const RESULT_FAILED = 3;
+    const RESULT_SUCCEEDED = 'succeeded';
+    const RESULT_LOCKED = 'locked';
+    const RESULT_FAILED = 'failed';
 
     /**
      * @var array
@@ -97,7 +97,7 @@ class Run
      */
     public function succeeded()
     {
-        return $this->result == self::RESULT_SUCCEEDED;
+        return self::RESULT_SUCCEEDED == $this->result;
     }
 
     /**
@@ -107,7 +107,7 @@ class Run
      */
     public function failed()
     {
-        return $this->result == self::RESULT_FAILED;
+        return self::RESULT_FAILED == $this->result;
     }
 
     /**

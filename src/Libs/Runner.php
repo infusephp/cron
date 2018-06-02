@@ -27,20 +27,6 @@ class Runner
     private $class;
 
     /**
-     * @deprecated
-     *
-     * @var string|null
-     */
-    private $module;
-
-    /**
-     * @deprecated
-     *
-     * @var string|null
-     */
-    private $command;
-
-    /**
      * @param CronJob $job
      * @param string  $class       callable job class
      * @param Factory $lockFactory
@@ -51,30 +37,6 @@ class Runner
         $this->jobModel = $job;
         $this->class = $class;
         $this->lock = new Lock($this->jobModel->id, $lockFactory, $namespace);
-
-        // DEPRECATED this is kept for BC
-        if (!$class && $job->module) {
-            $this->withModuleDeprecated($job->module, $job->command);
-        }
-    }
-
-    /**
-     * @deprecated
-     *
-     * Sets the callable class from a module and command argument
-     *
-     * @param string|null deprecated module argument
-     * @param string|null $command deprecated command argument
-     *
-     * @return self
-     */
-    public function withModuleDeprecated($module, $command)
-    {
-        $this->class = 'App\\'.$module.'\Controller';
-        $this->module = $module;
-        $this->command = $command;
-
-        return $this;
     }
 
     /**
@@ -100,9 +62,9 @@ class Runner
     /**
      * Runs a scheduled job.
      *
-     * @param int    $expires    time the job has to finish
-     * @param string $successUrl URL to be called upon a successful run
-     * @param Run    $run
+     * @param int          $expires    time the job has to finish
+     * @param string|false $successUrl URL to be called upon a successful run
+     * @param Run          $run
      *
      * @return Run result
      */
@@ -119,11 +81,6 @@ class Runner
 
         // set up the callable
         $job = $this->setUp($this->class, $run);
-
-        // DEPRECATED this is kept for BC
-        if ($job && $this->command) {
-            $job = $this->setUpControllerDeprecated($job, $this->command, $run);
-        }
 
         // this is where the job actually gets called
         if ($job) {
@@ -155,6 +112,13 @@ class Runner
      */
     private function setUp($class, Run $run)
     {
+        if (!$class) {
+            $run->writeOutput("Missing `class` parameter on {$this->jobModel->id} job")
+                ->setResult(Run::RESULT_FAILED);
+
+            return false;
+        }
+
         if (!class_exists($class)) {
             $run->writeOutput("$class does not exist")
                 ->setResult(Run::RESULT_FAILED);
@@ -170,29 +134,6 @@ class Runner
         }
 
         return $job;
-    }
-
-    /**
-     * @deprecated
-     *
-     * Sets up the callable given a controller
-     *
-     * @param callable $controller
-     * @param string   $command
-     * @param Run      $run
-     *
-     * @return array|false
-     */
-    private function setUpControllerDeprecated($controller, $command, Run $run)
-    {
-        if (!method_exists($controller, $command)) {
-            $run->setResult(Run::RESULT_FAILED)
-                 ->writeOutput("{$this->class}->{$command}() does not exist");
-
-            return false;
-        }
-
-        return [$controller, $command];
     }
 
     /**

@@ -28,15 +28,15 @@ class LockTest extends MockeryTestCase
 
     public function testGetName()
     {
-        $lock = new Lock('module.command', self::$lockFactory);
-        $this->assertEquals('cron.module.command', $lock->getName());
-        $lock = new Lock('module.command', self::$lockFactory, 'namespaced');
-        $this->assertEquals('namespaced:cron.module.command', $lock->getName());
+        $lock = new Lock('my_job', self::$lockFactory);
+        $this->assertEquals('cron.my_job', $lock->getName());
+        $lock = new Lock('my_job', self::$lockFactory, 'namespaced');
+        $this->assertEquals('namespaced:cron.my_job', $lock->getName());
     }
 
     public function testAcquireNoExpiry()
     {
-        $lock = new Lock('module.command', self::$lockFactory);
+        $lock = new Lock('my_job', self::$lockFactory);
 
         $this->assertFalse($lock->hasLock());
         $this->assertTrue($lock->acquire(0));
@@ -45,7 +45,7 @@ class LockTest extends MockeryTestCase
 
     public function testAcquire()
     {
-        $lock = new Lock('module.command', self::$lockFactory);
+        $lock = new Lock('my_job', self::$lockFactory);
         $this->assertTrue($lock->acquire(100));
         $this->assertTrue($lock->hasLock());
 

@@ -9,7 +9,7 @@
  * @license MIT
  */
 
-namespace Infuse\Cron\Tests;
+namespace Infuse\Cron\Tests\Jobs;
 
 use Infuse\Cron\Libs\Run;
 use Infuse\HasApp;

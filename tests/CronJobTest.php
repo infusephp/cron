@@ -17,6 +17,8 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 class CronJobTest extends MockeryTestCase
 {
+    public static $job;
+
     public static function setUpBeforeClass()
     {
         Test::$app['database']->getDefault()
@@ -27,10 +29,17 @@ class CronJobTest extends MockeryTestCase
 
     public function testCreate()
     {
-        $job = new CronJob();
-        $job->id = 'test.test';
-        $job->module = 'test';
-        $job->command = 'test';
-        $this->assertTrue($job->save());
+        self::$job = new CronJob();
+        self::$job->id = 'test.test';
+        $this->assertTrue(self::$job->save());
+    }
+
+    /**
+     * @depends testCreate
+     */
+    public function testEdit()
+    {
+        self::$job->last_ran = time();
+        $this->assertTrue(self::$job->save());
     }
 }

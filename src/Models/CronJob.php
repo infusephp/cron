@@ -3,7 +3,7 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
@@ -14,6 +14,12 @@ namespace Infuse\Cron\Models;
 use Infuse\HasApp;
 use Pulsar\Model;
 
+/**
+ * @property string      $id
+ * @property int|null    $last_ran
+ * @property bool        $last_run_succeeded
+ * @property string|null $last_run_output
+ */
 class CronJob extends Model
 {
     use HasApp;
@@ -22,8 +28,6 @@ class CronJob extends Model
         'id' => [
             'required' => true,
         ],
-        'module' => [],
-        'command' => [],
         'last_ran' => [
             'type' => Model::TYPE_DATE,
             'null' => true,

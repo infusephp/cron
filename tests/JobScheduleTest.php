@@ -12,6 +12,10 @@
 namespace Infuse\Cron\Tests;
 
 use Infuse\Cron\Libs\JobSchedule;
+use Infuse\Cron\Models\CronJob;
+use Infuse\Cron\Tests\Jobs\FailJob;
+use Infuse\Cron\Tests\Jobs\SuccessJob;
+use Infuse\Cron\Tests\Jobs\SuccessWithUrlJob;
 use Infuse\Test;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
@@ -22,22 +26,29 @@ class JobScheduleTest extends MockeryTestCase
 {
     public static $jobs = [
         [
-          'module' => 'test',
-          'command' => 'success_with_url',
-          'minute' => 0,
-          'hour' => 0,
+            'id' => 'test.success_with_url',
+            'class' => SuccessWithUrlJob::class,
+            'minute' => 0,
+            'hour' => 0,
         ],
         [
-          'module' => 'test',
-          'command' => 'success',
+            'id' => 'test.success',
+            'class' => SuccessJob::class,
+        ],
+        [
+            'id' => 'test.locked',
+            'class' => SuccessJob::class,
+            'expires' => 100,
+        ],
+        [
+            'id' => 'test.failed',
+            'class' => FailJob::class,
         ],
     ];
     public static $lockFactory;
 
     public static function setUpBeforeClass()
     {
-        include_once 'Controller.php';
-
         Test::$app['database']->getDefault()
             ->delete('CronJobs')
             ->where('id', 'test%', 'like')
@@ -45,6 +56,9 @@ class JobScheduleTest extends MockeryTestCase
 
         $store = new FlockStore(sys_get_temp_dir());
         self::$lockFactory = new Factory($store);
+
+        $lock = self::$lockFactory->createLock('cron.test.locked', 100);
+        $lock->acquire();
     }
 
     public function testGetAllJobs()
@@ -58,31 +72,37 @@ class JobScheduleTest extends MockeryTestCase
         $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
         $jobs = $schedule->getScheduledJobs();
 
-        $this->assertCount(2, $jobs);
+        $this->assertCount(4, $jobs);
 
-        $this->assertInstanceOf('Infuse\Cron\Models\CronJob', $jobs[0]['model']);
-        $this->assertEquals('test', $jobs[0]['model']->module);
-        $this->assertEquals('success_with_url', $jobs[0]['model']->command);
+        $this->assertInstanceOf(CronJob::class, $jobs[0]['model']);
+        $this->assertEquals('test.success_with_url', $jobs[0]['model']->id);
 
-        $this->assertInstanceOf('Infuse\Cron\Models\CronJob', $jobs[1]['model']);
-        $this->assertEquals('test', $jobs[1]['model']->module);
-        $this->assertEquals('success', $jobs[1]['model']->command);
+        $this->assertInstanceOf(CronJob::class, $jobs[1]['model']);
+        $this->assertEquals('test.success', $jobs[1]['model']->id);
+
+        $this->assertInstanceOf(CronJob::class, $jobs[2]['model']);
+        $this->assertEquals('test.locked', $jobs[2]['model']->id);
+
+        $this->assertInstanceOf(CronJob::class, $jobs[3]['model']);
+        $this->assertEquals('test.failed', $jobs[3]['model']->id);
     }
 
     public function testRunScheduled()
     {
         $output = Mockery::mock('Symfony\Component\Console\Output\OutputInterface');
         $output->shouldReceive('writeln')
-               ->times(7);
+            ->atLeast(1);
 
         $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
 
-        $this->assertTrue($schedule->runScheduled($output));
+        $this->assertFalse($schedule->runScheduled($output));
 
         // running the schedule should remove the
         // `success_with_url` job from the schedule
         $jobs = $schedule->getScheduledJobs();
-        $this->assertCount(1, $jobs);
-        $this->assertEquals('success', $jobs[0]['model']->command);
+        $this->assertCount(3, $jobs);
+        $this->assertEquals('test.success', $jobs[0]['model']->id);
+        $this->assertEquals('test.locked', $jobs[1]['model']->id);
+        $this->assertEquals('test.failed', $jobs[2]['model']->id);
     }
 }
