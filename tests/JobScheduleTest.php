@@ -8,8 +8,12 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
+
+namespace Infuse\Cron\Tests;
+
 use Infuse\Cron\Libs\JobSchedule;
 use Infuse\Test;
+use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Symfony\Component\Lock\Factory;
 use Symfony\Component\Lock\Store\FlockStore;

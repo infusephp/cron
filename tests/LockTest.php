@@ -8,6 +8,9 @@
  * @copyright 2015 Jared King
  * @license MIT
  */
+
+namespace Infuse\Cron\Tests;
+
 use Infuse\Cron\Libs\Lock;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Symfony\Component\Lock\Factory;

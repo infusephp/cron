@@ -9,8 +9,11 @@
  * @license MIT
  */
 
-namespace Infuse\Cron\Libs;
+namespace Infuse\Cron\Tests;
 
+use Infuse\Cron\Libs\FileGetContentsMock;
+use Infuse\Cron\Libs\Run;
+use Infuse\Cron\Libs\Runner;
 use Infuse\Cron\Models\CronJob;
 use Infuse\Test;
 use Mockery;
@@ -18,20 +21,15 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Symfony\Component\Lock\Factory;
 use Symfony\Component\Lock\Store\FlockStore;
 
-function file_get_contents($cmd)
-{
-    return RunnerTest::$functions->file_get_contents($cmd);
-}
-
 class RunnerTest extends MockeryTestCase
 {
-    public static $functions;
     public static $lockFactory;
 
     public static function setUpBeforeClass()
     {
         include_once 'TestJob.php';
         include_once 'Controller.php';
+        include_once 'file_get_contents_mock.php';
 
         Test::$app['database']->getDefault()
             ->delete('CronJobs')
@@ -49,7 +47,7 @@ class RunnerTest extends MockeryTestCase
 
     public function setUp()
     {
-        self::$functions = Mockery::mock();
+        FileGetContentsMock::$functions = Mockery::mock();
     }
 
     public function testGetJobModel()
@@ -182,7 +180,7 @@ class RunnerTest extends MockeryTestCase
     {
         $job = new CronJob();
         $job->id = 'test.invoke';
-        $runner = new Runner($job, 'App\Test\TestJob', self::$lockFactory);
+        $runner = new Runner($job, 'Infuse\Cron\Tests\TestJob', self::$lockFactory);
 
         $run = $runner->go();
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -202,7 +200,7 @@ class RunnerTest extends MockeryTestCase
         $job->command = 'success_with_url';
         $runner = new Runner($job, '', self::$lockFactory);
 
-        self::$functions->shouldReceive('file_get_contents')
+        FileGetContentsMock::$functions->shouldReceive('file_get_contents')
                         ->with('http://webhook.example.com/?m=yay')
                         ->once();
 

@@ -3,12 +3,16 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
  */
+
+namespace Infuse\Cron\Tests;
+
 use Infuse\Cron\Libs\Run;
+use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 class RunTest extends MockeryTestCase
