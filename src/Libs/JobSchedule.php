@@ -3,7 +3,7 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
@@ -12,21 +12,39 @@
 namespace Infuse\Cron\Libs;
 
 use Infuse\Cron\Models\CronJob;
+use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Lock\Factory;
 
 class JobSchedule
 {
+    use LoggerAwareTrait;
+
     /**
      * @var array
      */
     private $jobs;
 
     /**
-     * @var array list of available jobs
+     * @var Factory
      */
-    public function __construct(array $jobs)
+    private $lockFactory;
+
+    /**
+     * @var string
+     */
+    private $namespace;
+
+    /**
+     * @param array list of available jobs
+     * @param Factory $lockFactory
+     * @param string  $namespace
+     */
+    public function __construct(array $jobs, Factory $lockFactory, $namespace = '')
     {
         $this->jobs = $jobs;
+        $this->lockFactory = $lockFactory;
+        $this->namespace = $namespace;
     }
 
     /**
@@ -127,7 +145,10 @@ class JobSchedule
 
         // set up the runner
         $class = array_value($jobInfo, 'class');
-        $runner = new Runner($job, $class);
+        $runner = new Runner($job, $class, $this->lockFactory, $this->namespace);
+        if ($this->logger) {
+            $runner->setLogger($this->logger);
+        }
 
         // set up an object to track this run
         $run = new Run();
@@ -138,7 +159,7 @@ class JobSchedule
 
         if ($run->succeeded()) {
             $output->writeln('-- Success!');
-        } elseif ($run->getResult() == Run::RESULT_LOCKED) {
+        } elseif (Run::RESULT_LOCKED == $run->getResult()) {
             $output->writeln("{$job->id} is locked!");
         } elseif ($run->failed()) {
             $output->writeln('-- Failed!');

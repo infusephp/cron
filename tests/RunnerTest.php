@@ -3,7 +3,7 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
@@ -12,10 +12,11 @@
 namespace Infuse\Cron\Libs;
 
 use Infuse\Cron\Models\CronJob;
-use Infuse\Application;
 use Infuse\Test;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Symfony\Component\Lock\Factory;
+use Symfony\Component\Lock\Store\FlockStore;
 
 function file_get_contents($cmd)
 {
@@ -25,6 +26,7 @@ function file_get_contents($cmd)
 class RunnerTest extends MockeryTestCase
 {
     public static $functions;
+    public static $lockFactory;
 
     public static function setUpBeforeClass()
     {
@@ -40,6 +42,9 @@ class RunnerTest extends MockeryTestCase
             ->delete('CronJobs')
             ->where('id', 'non_existent%', 'like')
             ->execute();
+
+        $store = new FlockStore(sys_get_temp_dir());
+        self::$lockFactory = new Factory($store);
     }
 
     public function setUp()
@@ -50,37 +55,32 @@ class RunnerTest extends MockeryTestCase
     public function testGetJobModel()
     {
         $job = new CronJob();
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
         $this->assertEquals($job, $runner->getJobModel());
     }
 
     public function testGetClass()
     {
         $job = new CronJob();
-        $runner = new Runner($job, 'test');
+        $runner = new Runner($job, 'test', self::$lockFactory);
         $this->assertEquals('test', $runner->getJobClass());
 
         $job->module = 'test';
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
         $this->assertEquals('App\test\Controller', $runner->getJobClass());
     }
 
     public function testGoLocked()
     {
-        Test::$app['config']->set('app.hostname', 'example.com');
-        $redis = Mockery::mock();
-        $redis->shouldReceive('setnx')
-              ->withArgs(['example.com:cron.test.locked', 100])
-              ->andReturn(false)
-              ->once();
-        Test::$app['redis'] = $redis;
+        $lock = self::$lockFactory->createLock('cron.test.locked', 100);
+        $lock->acquire();
 
         $job = new CronJob();
         $job->id = 'test.locked';
         $job->module = 'test';
         $job->command = 'locked';
         $job->setApp(Test::$app);
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
 
         $run = $runner->go(100);
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -95,7 +95,7 @@ class RunnerTest extends MockeryTestCase
         $job->id = 'non_existent.non_existent';
         $job->module = 'non_existent';
         $job->command = 'non_existent';
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
 
         $run = $runner->go();
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -113,7 +113,7 @@ class RunnerTest extends MockeryTestCase
         $job->id = 'test.non_existent';
         $job->module = 'test';
         $job->command = 'non_existent';
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
 
         $run = $runner->go();
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -131,7 +131,7 @@ class RunnerTest extends MockeryTestCase
         $job->id = 'test.exception';
         $job->module = 'test';
         $job->command = 'exception';
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
 
         $run = $runner->go();
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -149,7 +149,7 @@ class RunnerTest extends MockeryTestCase
         $job->id = 'test.fail';
         $job->module = 'test';
         $job->command = 'fail';
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
 
         $run = $runner->go();
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -166,7 +166,7 @@ class RunnerTest extends MockeryTestCase
         $job->id = 'test.success';
         $job->module = 'test';
         $job->command = 'success';
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
 
         $run = $runner->go();
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -182,7 +182,7 @@ class RunnerTest extends MockeryTestCase
     {
         $job = new CronJob();
         $job->id = 'test.invoke';
-        $runner = new Runner($job, 'App\Test\TestJob');
+        $runner = new Runner($job, 'App\Test\TestJob', self::$lockFactory);
 
         $run = $runner->go();
         $this->assertInstanceOf('Infuse\Cron\Libs\Run', $run);
@@ -200,7 +200,7 @@ class RunnerTest extends MockeryTestCase
         $job->id = 'test.success_with_url';
         $job->module = 'test';
         $job->command = 'success_with_url';
-        $runner = new Runner($job, '');
+        $runner = new Runner($job, '', self::$lockFactory);
 
         self::$functions->shouldReceive('file_get_contents')
                         ->with('http://webhook.example.com/?m=yay')

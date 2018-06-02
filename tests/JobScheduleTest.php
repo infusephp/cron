@@ -3,7 +3,7 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
@@ -11,6 +11,8 @@
 use Infuse\Cron\Libs\JobSchedule;
 use Infuse\Test;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Symfony\Component\Lock\Factory;
+use Symfony\Component\Lock\Store\FlockStore;
 
 class JobScheduleTest extends MockeryTestCase
 {
@@ -26,6 +28,7 @@ class JobScheduleTest extends MockeryTestCase
           'command' => 'success',
         ],
     ];
+    public static $lockFactory;
 
     public static function setUpBeforeClass()
     {
@@ -35,17 +38,20 @@ class JobScheduleTest extends MockeryTestCase
             ->delete('CronJobs')
             ->where('id', 'test%', 'like')
             ->execute();
+
+        $store = new FlockStore(sys_get_temp_dir());
+        self::$lockFactory = new Factory($store);
     }
 
     public function testGetAllJobs()
     {
-        $schedule = new JobSchedule(self::$jobs);
+        $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
         $this->assertEquals(self::$jobs, $schedule->getAllJobs());
     }
 
     public function testGetScheduledJobs()
     {
-        $schedule = new JobSchedule(self::$jobs);
+        $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
         $jobs = $schedule->getScheduledJobs();
 
         $this->assertCount(2, $jobs);
@@ -65,7 +71,7 @@ class JobScheduleTest extends MockeryTestCase
         $output->shouldReceive('writeln')
                ->times(7);
 
-        $schedule = new JobSchedule(self::$jobs);
+        $schedule = new JobSchedule(self::$jobs, self::$lockFactory);
 
         $this->assertTrue($schedule->runScheduled($output));
 

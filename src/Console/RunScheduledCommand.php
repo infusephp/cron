@@ -3,7 +3,7 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
@@ -30,9 +30,20 @@ class RunScheduledCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $jobs = (array) $this->app['config']->get('cron');
-        $schedule = new JobSchedule($jobs);
+        return $this->getSchedule()->runScheduled($output) ? 0 : 1;
+    }
 
-        return $schedule->runScheduled($output) ? 0 : 1;
+    /**
+     * @return JobSchedule
+     */
+    private function getSchedule()
+    {
+        $jobs = (array) $this->app['config']->get('cron');
+        $lockFactory = $this->app['lock_factory'];
+        $namespace = $this->app['config']->get('app.hostname');
+        $schedule = new JobSchedule($jobs, $lockFactory, $namespace);
+        $schedule->setLogger($this->app['logger']);
+
+        return $schedule;
     }
 }

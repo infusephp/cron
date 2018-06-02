@@ -3,7 +3,7 @@
 /**
  * @author Jared King <j@jaredtking.com>
  *
- * @link http://jaredtking.com
+ * @see http://jaredtking.com
  *
  * @copyright 2015 Jared King
  * @license MIT
@@ -11,12 +11,10 @@
 
 namespace Infuse\Cron\Libs;
 
-use Infuse\HasApp;
+use Symfony\Component\Lock\Factory;
 
 class Lock
 {
-    use HasApp;
-
     /**
      * @var string
      */
@@ -28,17 +26,29 @@ class Lock
     private $name;
 
     /**
-     * @var bool
+     * @var Factory
      */
-    private $hasLock;
+    private $factory;
 
     /**
-     * @var string
+     * @var \Symfony\Component\Lock\Lock
      */
-    public function __construct($jobId)
+    private $lock;
+
+    /**
+     * @param string  $jobId
+     * @param Factory $lockFactory
+     * @param string  $namespace
+     */
+    public function __construct($jobId, Factory $lockFactory, $namespace = '')
     {
         $this->jobId = $jobId;
-        $this->hasLock = false;
+        if ($namespace) {
+            $this->name = $namespace.':cron.'.$this->jobId;
+        } else {
+            $this->name = 'cron.'.$this->jobId;
+        }
+        $this->factory = $lockFactory;
     }
 
     /**
@@ -48,7 +58,7 @@ class Lock
      */
     public function hasLock()
     {
-        return $this->hasLock;
+        return $this->lock ? $this->lock->isAcquired() : false;
     }
 
     /**
@@ -65,18 +75,10 @@ class Lock
             return true;
         }
 
-        $redis = $this->getRedis();
         $k = $this->getName();
+        $this->lock = $this->factory->createLock($k, $expires);
 
-        if ($redis->setnx($k, $expires)) {
-            $redis->expire($k, $expires);
-
-            $this->hasLock = true;
-
-            return true;
-        }
-
-        return false;
+        return $this->lock->acquire();
     }
 
     /**
@@ -86,13 +88,11 @@ class Lock
      */
     public function release()
     {
-        if (!$this->hasLock) {
+        if (!$this->lock) {
             return $this;
         }
 
-        $this->getRedis()->del($this->getName());
-
-        $this->hasLock = false;
+        $this->lock->release();
 
         return $this;
     }
@@ -104,23 +104,6 @@ class Lock
      */
     public function getName()
     {
-        if (!$this->name) {
-            // namespace
-            $this->name = $this->app['config']->get('app.hostname').':';
-            // key
-            $this->name .= 'cron.'.$this->jobId;
-        }
-
         return $this->name;
-    }
-
-    /**
-     * Gets the redis instance.
-     *
-     * @return \Redis
-     */
-    private function getRedis()
-    {
-        return $this->app['redis'];
     }
 }

@@ -2,11 +2,15 @@
 
 namespace Infuse\Cron\Libs;
 
-use Infuse\Cron\Models\CronJob;
 use Exception;
+use Infuse\Cron\Models\CronJob;
+use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\Lock\Factory;
 
 class Runner
 {
+    use LoggerAwareTrait;
+
     /**
      * @var CronJob
      */
@@ -24,29 +28,29 @@ class Runner
 
     /**
      * @deprecated
+     *
      * @var string|null
      */
     private $module;
 
     /**
      * @deprecated
+     *
      * @var string|null
      */
     private $command;
 
     /**
-     * @var CronJob
-     * @var string  $class callable job class
+     * @param CronJob $job
+     * @param string  $class       callable job class
+     * @param Factory $lockFactory
+     * @param string  $namespace
      */
-    public function __construct(CronJob $job, $class)
+    public function __construct(CronJob $job, $class, Factory $lockFactory, $namespace = '')
     {
         $this->jobModel = $job;
         $this->class = $class;
-
-        // build the job lock
-        $lock = new Lock($this->jobModel->id);
-        $lock->setApp($this->jobModel->getApp());
-        $this->lock = $lock;
+        $this->lock = new Lock($this->jobModel->id, $lockFactory, $namespace);
 
         // DEPRECATED this is kept for BC
         if (!$class && $job->module) {
@@ -57,10 +61,10 @@ class Runner
     /**
      * @deprecated
      *
-     * Sets the callable class from a module and command argument.
+     * Sets the callable class from a module and command argument
      *
-     * @var string|null deprecated module argument
-     * @var string|null $command deprecated command argument
+     * @param string|null deprecated module argument
+     * @param string|null $command deprecated command argument
      *
      * @return self
      */
@@ -171,7 +175,7 @@ class Runner
     /**
      * @deprecated
      *
-     * Sets up the callable given a controller.
+     * Sets up the callable given a controller
      *
      * @param callable $controller
      * @param string   $command
@@ -205,15 +209,16 @@ class Runner
 
             $ret = call_user_func($job, $run);
             $result = Run::RESULT_SUCCEEDED;
-            if ($ret === false) {
+            if (false === $ret) {
                 $result = Run::RESULT_FAILED;
             }
 
             return $run->writeOutput(ob_get_clean())
                        ->setResult($result);
         } catch (Exception $e) {
-            $app = $this->jobModel->getApp();
-            $app['logger']->error("An uncaught exception occurred while running the {$this->jobModel->id()} scheduled job.", ['exception' => $e]);
+            if ($this->logger) {
+                $this->logger->error("An uncaught exception occurred while running the {$this->jobModel->id()} scheduled job.", ['exception' => $e]);
+            }
 
             return $run->writeOutput(ob_get_clean())
                        ->writeOutput($e->getMessage())
