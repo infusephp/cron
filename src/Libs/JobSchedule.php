@@ -157,7 +157,7 @@ class JobSchedule
         $success = true;
 
         $event = new ScheduleRunBeginEvent();
-        $this->dispatcher->dispatch($event::NAME, $event);
+        $this->dispatcher->dispatch($event, $event::NAME);
 
         foreach ($this->getScheduledJobs() as $jobInfo) {
             $job = $jobInfo['model'];
@@ -167,7 +167,7 @@ class JobSchedule
         }
 
         $event = new ScheduleRunFinishedEvent();
-        $this->dispatcher->dispatch($event::NAME, $event);
+        $this->dispatcher->dispatch($event, $event::NAME);
 
         return $success;
     }

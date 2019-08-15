@@ -91,7 +91,7 @@ class Runner
 
         // call the `cron_job.begin` event
         $event = new CronJobBeginEvent($this->jobModel->id);
-        $this->dispatcher->dispatch($event::NAME, $event);
+        $this->dispatcher->dispatch($event, $event::NAME);
         if ($event->isPropagationStopped()) {
             $run->writeOutput('Rejected by cron_job.begin event listener')
                 ->setResult(Run::RESULT_FAILED);
@@ -108,7 +108,7 @@ class Runner
         // perform post-run tasks:
         // call the `cron_job.finished` event
         $event = new CronJobFinishedEvent($this->jobModel->id, $run->getResult());
-        $this->dispatcher->dispatch($event::NAME, $event);
+        $this->dispatcher->dispatch($event, $event::NAME);
 
         // persist the result
         $this->saveRun($run);

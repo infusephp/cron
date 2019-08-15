@@ -2,7 +2,7 @@
 
 namespace Infuse\Cron\Events;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class ScheduleRunBeginEvent extends Event
 {
